@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, Copy)]
 pub struct Pixel {
     red: u8,
     green: u8,
@@ -33,8 +34,28 @@ impl From<Pixel> for u32 {
     }
 }
 
-struct Image {
-    height: u32,
-    width: u32,
+#[derive(Debug, Clone)]
+pub struct Image {
+    pub height: u32,
+    pub width: u32,
     pixels: Vec<Pixel>,
+}
+
+impl Image {
+    pub fn new<F>(height: u32, width: u32, colour: F) -> Self
+        where F: Fn(u32, u32) -> Pixel
+    {
+        let size = (width as usize) * (height as usize);
+        let mut pixels = Vec::with_capacity(size);
+        for r in 0..height {
+            for c in 0..width {
+                pixels.push(colour(r, c))
+            }
+        }
+        Self {
+            height,
+            width,
+            pixels,
+        }
+    }
 }
