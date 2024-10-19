@@ -21,6 +21,14 @@ impl Pixel {
             blue,
         }
     }
+
+    pub fn black() -> Self {
+        Self {
+            red: 0,
+            green: 0,
+            blue: 0,
+        }
+    }
 }
 
 impl From<Pixel> for u32 {
@@ -103,14 +111,14 @@ mod tests {
 
     #[test]
     fn new_image_has_correct_num_pixels() {
-        let image = Image::new(3, 4, |_r, _c| Pixel::new(0, 0, 0));
+        let image = Image::new(3, 4, |_r, _c| Pixel::black());
         assert_eq!(image.pixels.len(), 12);
     }
 
     #[test]
     fn very_large_image() {
         let width = u16::MAX;
-        let image = Image::new(1, width, |_r, _c| Pixel::new(0, 0, 0));
+        let image = Image::new(1, width, |_r, _c| Pixel::black());
         assert_eq!(image.pixels.len(), width.into());
     }
 }
