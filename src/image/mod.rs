@@ -44,14 +44,14 @@ impl From<Pixel> for u32 {
 
 #[derive(Debug, Clone)]
 pub struct Image {
-    height: u32,
-    width: u32,
+    height: u16,
+    width: u16,
     pixels: Vec<Pixel>,
 }
 
 impl Image {
-    pub fn new<F>(height: u32, width: u32, colour: F) -> Self
-        where F: Fn(u32, u32) -> Pixel
+    pub fn new<F>(height: u16, width: u16, colour: F) -> Self
+        where F: Fn(u16, u16) -> Pixel
     {
         let size = (width as usize) * (height as usize);
         let mut pixels = Vec::with_capacity(size);
@@ -73,5 +73,44 @@ impl Image {
             f.write_all(&data)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn red_pixel_to_u32() {
+        let red = Pixel::new(255, 0, 0);
+        let res: u32 = red.into();
+        assert_eq!(res, 0x00ff0000);
+    }
+
+    #[test]
+    fn green_pixel_to_u32() {
+        let green = Pixel::new(0, 255, 0);
+        let res: u32 = green.into();
+        assert_eq!(res, 0x0000ff00);
+    }
+
+    #[test]
+    fn blue_pixel_to_u32() {
+        let blue = Pixel::new(0, 0, 255);
+        let res: u32 = blue.into();
+        assert_eq!(res, 0x000000ff);
+    }
+
+    #[test]
+    fn new_image_has_correct_num_pixels() {
+        let image = Image::new(3, 4, |_r, _c| Pixel::new(0, 0, 0));
+        assert_eq!(image.pixels.len(), 12);
+    }
+
+    #[test]
+    fn very_large_image() {
+        let width = u16::MAX;
+        let image = Image::new(1, width, |_r, _c| Pixel::new(0, 0, 0));
+        assert_eq!(image.pixels.len(), width.into());
     }
 }

@@ -34,14 +34,14 @@ impl ImageFormatter for PPMFormatter {
 
 struct PPMIterator<'a> {
     ascii_mode: bool,
-    rows: u32,
-    cols: u32,
+    rows: u16,
+    cols: u16,
     pixels: &'a[Pixel],
-    ix: u64,
+    ix: u32,
 }
 
 impl<'a> PPMIterator<'a> {
-    fn new(ascii_mode: bool, rows: u32, cols: u32, pixels: &'a[Pixel]) -> Self {
+    fn new(ascii_mode: bool, rows: u16, cols: u16, pixels: &'a[Pixel]) -> Self {
         Self {
             ascii_mode,
             rows,
@@ -57,7 +57,7 @@ impl<'a> Iterator for PPMIterator<'a> {
     
     fn next(&mut self) -> Option<Self::Item> {
         // return None
-        if self.ix == (self.rows as u64) * (self.cols as u64) {
+        if self.ix == (self.rows as u32) * (self.cols as u32) {
             return None
         }
         let pixel = self.pixels[self.ix as usize];
