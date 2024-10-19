@@ -8,9 +8,9 @@ use std::path::Path;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Pixel {
-    pub red: u8,
-    pub green: u8,
-    pub blue: u8,
+    red: u8,
+    green: u8,
+    blue: u8,
 }
 
 impl Pixel {
@@ -44,8 +44,8 @@ impl From<Pixel> for u32 {
 
 #[derive(Debug, Clone)]
 pub struct Image {
-    pub height: u32,
-    pub width: u32,
+    height: u32,
+    width: u32,
     pixels: Vec<Pixel>,
 }
 
