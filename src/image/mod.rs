@@ -2,9 +2,8 @@ pub mod formatter;
 
 use formatter::ImageFormatter;
 
-use std::fs;
+use std::fs::File;
 use std::io::{self, Write};
-use std::path::Path;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Pixel {
@@ -75,8 +74,7 @@ impl Image {
         }
     }
 
-    pub fn write_to_file<T: ImageFormatter>(&self, filename: &Path, formatter: &mut T) -> io::Result<()> {
-        let mut f = fs::File::create(filename)?;
+    pub fn write_to_file<T: ImageFormatter>(&self, f: &mut File, formatter: &mut T) -> io::Result<()> {
         for data in formatter.get_bytes(&self) {
             f.write_all(&data)?;
         }
