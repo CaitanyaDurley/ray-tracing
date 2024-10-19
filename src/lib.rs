@@ -1,4 +1,7 @@
-pub mod image;
-pub mod image_formatters;
+mod image;
 
-pub use image::{Pixel, Image};
+pub use image::{
+    Pixel,
+    Image,
+    formatter::*
+};

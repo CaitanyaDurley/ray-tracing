@@ -1,4 +1,8 @@
-use crate::image::*;
+use crate::image::{
+    Image,
+    Pixel,
+    formatter::ImageFormatter,
+};
 
 use std::iter;
 

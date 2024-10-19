@@ -1,3 +1,7 @@
+pub mod formatter;
+
+use formatter::ImageFormatter;
+
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -42,7 +46,7 @@ impl From<Pixel> for u32 {
 pub struct Image {
     pub height: u32,
     pub width: u32,
-    pub pixels: Vec<Pixel>,
+    pixels: Vec<Pixel>,
 }
 
 impl Image {
@@ -70,8 +74,4 @@ impl Image {
         }
         Ok(())
     }
-}
-
-pub trait ImageFormatter {
-    fn get_bytes(&mut self, image: &Image) -> impl Iterator<Item = Vec<u8>>;
 }
