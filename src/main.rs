@@ -4,7 +4,11 @@ use std::{fs::File, path::Path};
 
 fn main() {
     let side = 1024;
-    let gradient = |r, c| Pixel::new((255 * c / side) as u8, (255 * r / side) as u8, 0);
+    let gradient = |r, c| Pixel::new(
+        (255. * (c as f32 / side as f32)) as u8,
+        (255. * (r as f32 / side as f32)) as u8,
+        0
+    );
     let blue = Image::new(side, side, gradient);
     let mut ppm_formatter = PPMFormatter::new(true);
     let mut f = File::create(Path::new("tmp.ppm")).unwrap();
