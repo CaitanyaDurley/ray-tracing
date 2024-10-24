@@ -17,19 +17,26 @@ fn u32_leading_zeros() {
 struct DummyFormatter;
 
 impl ImageFormatter for DummyFormatter {
-    fn get_bytes(&mut self, _image: &Image) -> impl Iterator<Item = Vec<u8>> {
-        (0..=2u8).map(|x| (0..=x).collect())
+    fn get_bytes(&mut self, image: &Image) -> impl Iterator<Item = Vec<u8>> {
+        let height = image.height as u8;
+        let width = image.width as u8;
+        (0..height).flat_map(move |r| (0..width).map(move |c| vec![r, c]))
+    }
+    
+    fn len(&self, image: &Image) -> u64 {
+        2 * (image.width as u64) * (image.height as u64)
     }
 }
 
 #[test]
 fn writes_to_file_faithfully() {
-    let image = Image::new(3, 2, |_r, _c| Pixel::black());
+    let image = Image::new(2, 3, |_r, _c| Pixel::black());
     let mut dummy_formatter = DummyFormatter {};
     let mut tmpfile = tempfile::tempfile().unwrap();
     image.write_to_file(&mut tmpfile, &mut dummy_formatter).unwrap();
-    let mut buffer = Vec::with_capacity(6);
+    let mut actual = Vec::new();
     tmpfile.seek(SeekFrom::Start(0)).unwrap();
-    tmpfile.read_to_end(&mut buffer).unwrap();
-    assert_eq!(buffer, vec![0, 0, 1, 0, 1, 2]);
+    tmpfile.read_to_end(&mut actual).unwrap();
+    let expected: Vec<u8> = dummy_formatter.get_bytes(&image).flatten().collect();
+    assert_eq!(actual, expected);
 }

@@ -51,8 +51,8 @@ impl From<Pixel> for u32 {
 
 #[derive(Debug, Clone)]
 pub struct Image {
-    height: u16,
-    width: u16,
+    pub height: u16,
+    pub width: u16,
     pixels: Vec<Pixel>,
 }
 
@@ -75,8 +75,15 @@ impl Image {
     }
 
     pub fn write_to_file<T: ImageFormatter>(&self, f: &mut File, formatter: &mut T) -> io::Result<()> {
-        for data in formatter.get_bytes(&self) {
+        let mut stdout = io::stdout();
+        let size = formatter.len(self) as f64;
+        let mut count= 0;
+        for data in formatter.get_bytes(self) {
             f.write_all(&data)?;
+            count += data.len();
+            if 0 == count % 1000 {
+                stdout.write_all(format!("\rWritten {:.1}%", 100.0 * (count as f64) / size).as_bytes())?;
+            }
         }
         Ok(())
     }

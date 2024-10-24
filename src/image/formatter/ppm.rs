@@ -15,20 +15,36 @@ impl PPMFormatter {
             ascii_mode,
         }
     }
-}
 
-impl ImageFormatter for PPMFormatter {
-    fn get_bytes(&mut self, image: &Image) -> impl Iterator<Item = Vec<u8>> {
+    fn header(&self, image: &Image) -> String {
         let magic_number = if self.ascii_mode {
             "P3"
         } else {
             "P6"
         };
+        format!("{}\n{} {}\n255\n", magic_number, image.width, image.height)
+    }
+}
+
+impl ImageFormatter for PPMFormatter {
+    fn get_bytes(&mut self, image: &Image) -> impl Iterator<Item = Vec<u8>> {
         Iterator::chain(
-            iter::once(format!("{}\n{} {}\n255\n", magic_number, image.width, image.height).into_bytes()),
+            iter::once(self.header(image).into_bytes()),
             PPMIterator::new(self.ascii_mode, image)
         )
     }
+    
+    fn len(&self, image: &Image) -> u64 {
+        // RBG for each pixel
+        let mut pixel_bytes: u64 = (image.width as u64) * (image.height as u64) * 3;
+        if self.ascii_mode {
+            // Each R/G/B value is upto 3 chars long (255) followed by " " or "\n"
+            pixel_bytes *= 4
+        }
+        self.header(image).len() as u64 + pixel_bytes
+    }
+
+    
 }
 
 struct PPMIterator<'a> {
