@@ -7,4 +7,8 @@ pub use image::{
     formatter::*
 };
 
-pub use geometry::Point;
+pub use geometry::{
+    Point,
+    Vector,
+    Ray,
+};
