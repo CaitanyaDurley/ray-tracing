@@ -212,8 +212,8 @@ impl Div<f64> for Vector {
 
 
 pub struct Ray {
-    origin: Point,
-    direction: Vector,
+    pub origin: Point,
+    pub direction: Vector,
 }
 
 impl Ray {

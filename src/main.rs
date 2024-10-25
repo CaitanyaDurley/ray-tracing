@@ -52,6 +52,8 @@ fn main() {
     image.write_to_file(&mut f, &mut ppm_formatter).unwrap();
 }
 
-fn ray_colour(_ray: &Ray) -> Pixel {
-    Pixel::black()
+fn ray_colour(ray: &Ray) -> Pixel {
+    let scale_factor = (ray.direction.unit().y + 1.0) / 2.0;
+    let whiteout = ((1.0 - scale_factor) * 255.0) as u8;
+    Pixel::new( whiteout, whiteout, 255)
 }

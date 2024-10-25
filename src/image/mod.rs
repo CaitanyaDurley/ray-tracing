@@ -64,7 +64,7 @@ impl Image {
         let mut pixels = Vec::with_capacity(size);
         for r in 0..height {
             for c in 0..width {
-                pixels.push(colour(r, c))
+                pixels.push(colour(c, r))
             }
         }
         Self {
