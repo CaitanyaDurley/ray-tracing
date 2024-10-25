@@ -211,6 +211,7 @@ impl Div<f64> for Vector {
 }
 
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,
@@ -227,4 +228,11 @@ impl Ray {
     pub fn at(&self, t: f64) -> Point {
         self.origin + self.direction * t
     }
+}
+
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Sphere {
+    pub center: Point,
+    pub radius: f64,
 }

@@ -11,4 +11,5 @@ pub use geometry::{
     Point,
     Vector,
     Ray,
+    Sphere,
 };

@@ -81,7 +81,7 @@ impl<'a> Iterator for PPMIterator<'a> {
                 .join(" ")
                 .into_bytes();
         }
-        return Some(out)
+        Some(out)
     }
 }
 
