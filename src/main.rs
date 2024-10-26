@@ -1,4 +1,4 @@
-use ray_tracing::{Image, PPMFormatter, Pixel, Point, Ray, Sphere, Vector};
+use ray_tracing::{Image, PPMFormatter, Pixel, Point, Ray, Sphere, Surface, Vector};
 
 use std::{fs::File, path::Path};
 
@@ -43,10 +43,7 @@ fn main() {
         z: focal_length
     };
     let pixel00 = viewport_upper_left + (pixel_delta_u + pixel_delta_v) / 2.0;
-    let sphere = Sphere {
-        center: Point::new(0.0, 0.0, -1.0),
-        radius: 0.5,
-    };
+    let sphere = Sphere::new(Point::new(0.0, 0.0, -1.0), 0.5);
     let colour_generator = |x: u16, y: u16| {
         let point: Point = pixel00 + (x as f64) * pixel_delta_u + (y as f64) * pixel_delta_v;
         let ray = Ray::from_two_points(eye_point, point);
@@ -59,31 +56,16 @@ fn main() {
 }
 
 fn ray_colour(sphere: Sphere, ray: Ray) -> Pixel {
-    let t = sphere_intersection(sphere, ray);
-    if t > 0.0 {
-        let normal = (ray.at(t) - sphere.center).unit();
-        let colour_map = 255.0 * (1.0 + normal) / 2.0;
-        return Pixel::new(colour_map.x as u8, colour_map.y as u8, colour_map.z as u8)
-    }
-    let scale_factor = (ray.direction.unit().y + 1.0) / 2.0;
-    let whiteout = ((1.0 - scale_factor) * 255.0) as u8;
-    Pixel::new(whiteout, whiteout, 255)
-}
-
-/// Given a Sphere and Ray, return the smallest value for which
-/// the Ray intersects the Sphere (or -1.0 if it doesn't)
-/// # Assumptions
-/// 1. The sphere is in front of the viewport
-/// 1. No part of the sphere is behind the eyepoint
-fn sphere_intersection(sphere: Sphere, ray: Ray) -> f64 {
-    let oc = sphere.center - ray.origin;
-    let a = ray.direction.l2_norm_squared();
-    let h = ray.direction.dot(oc);
-    let c = oc.l2_norm_squared() - sphere.radius.powi(2);
-    let discriminant = h.powi(2) - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / a
+    let p = sphere.intersection(ray, 0.0, f64::MAX);
+    match p {
+        Some(p) => {
+            let colour_map = 255.0 * (1.0 + sphere.normal(p)) / 2.0;
+            Pixel::new(colour_map.x as u8, colour_map.y as u8, colour_map.z as u8)
+        },
+        None => {
+            let scale_factor = (ray.direction.unit().y + 1.0) / 2.0;
+            let whiteout = ((1.0 - scale_factor) * 255.0) as u8;
+            Pixel::new(whiteout, whiteout, 255)
+        }
     }
 }

@@ -1,5 +1,4 @@
-mod ppm;
-pub use ppm::PPMFormatter;
+pub mod ppm;
 
 use crate::image::Image;
 

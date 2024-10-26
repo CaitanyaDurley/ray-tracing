@@ -1,3 +1,5 @@
+pub mod surface;
+
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -228,11 +230,4 @@ impl Ray {
     pub fn at(&self, t: f64) -> Point {
         self.origin + self.direction * t
     }
-}
-
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Sphere {
-    pub center: Point,
-    pub radius: f64,
 }

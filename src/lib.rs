@@ -4,12 +4,18 @@ mod geometry;
 pub use image::{
     Pixel,
     Image,
-    formatter::*
+    formatter::{
+        ImageFormatter,
+        ppm::PPMFormatter,
+    },
 };
 
 pub use geometry::{
     Point,
     Vector,
     Ray,
-    Sphere,
+    surface::{
+        Surface,
+        sphere::Sphere,
+    },
 };
