@@ -73,15 +73,11 @@ impl<'a> Iterator for PPMIterator<'a> {
         }
         let pixel = self.image.pixels[self.ix as usize];
         self.ix += 1;
-        let mut out = vec![pixel.red, pixel.green, pixel.blue];
-        if self.ascii_mode {
-            out = out.iter().map(ToString::to_string)
-                .chain(iter::once("\n".to_string()))
-                .collect::<Vec<String>>()
-                .join(" ")
-                .into_bytes();
-        }
-        Some(out)
+        Some(if self.ascii_mode {
+            format!("{} {} {}\n", pixel.red, pixel.green, pixel.blue).into_bytes()
+        } else {
+            vec![pixel.red, pixel.green, pixel.blue]
+        })
     }
 }
 
