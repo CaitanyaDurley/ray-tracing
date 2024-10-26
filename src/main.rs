@@ -5,8 +5,10 @@ use std::{fs::File, path::Path};
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
     // Measured in number of Pixels
-    let image_width: u16 = 400;
+    let image_width: u16 = 800;
     let image_height = (image_width as f64 / aspect_ratio) as u16;
+    // let image_width = 1920;
+    // let image_height = 1200;
     // Measured in the units of our coordinate system
     let focal_length = 1.0;
     let viewport_height = 2.0;
@@ -42,7 +44,7 @@ fn main() {
     };
     let pixel00 = viewport_upper_left + (pixel_delta_u + pixel_delta_v) / 2.0;
     let sphere = Sphere {
-        center: Point::new(0.0, 0.0, -2.0),
+        center: Point::new(0.0, 0.0, -1.0),
         radius: 0.5,
     };
     let colour_generator = |x: u16, y: u16| {
@@ -57,17 +59,31 @@ fn main() {
 }
 
 fn ray_colour(sphere: Sphere, ray: Ray) -> Pixel {
-    if hits_sphere(sphere, ray) {
-        return Pixel::new(255, 0, 0)
+    let t = sphere_intersection(sphere, ray);
+    if t > 0.0 {
+        let normal = (ray.at(t) - sphere.center).unit();
+        let colour_map = 255.0 * (1.0 + normal) / 2.0;
+        return Pixel::new(colour_map.x as u8, colour_map.y as u8, colour_map.z as u8)
     }
     let scale_factor = (ray.direction.unit().y + 1.0) / 2.0;
     let whiteout = ((1.0 - scale_factor) * 255.0) as u8;
-    Pixel::new( whiteout, whiteout, 255)
+    Pixel::new(whiteout, whiteout, 255)
 }
 
-fn hits_sphere(sphere: Sphere, ray: Ray) -> bool {
+/// Given a Sphere and Ray, return the smallest value for which
+/// the Ray intersects the Sphere (or -1.0 if it doesn't)
+/// # Assumptions
+/// 1. The sphere is in front of the viewport
+/// 1. No part of the sphere is behind the eyepoint
+fn sphere_intersection(sphere: Sphere, ray: Ray) -> f64 {
+    let oc = sphere.center - ray.origin;
     let a = ray.direction.l2_norm_squared();
-    let b = -2.0 * ray.direction.dot(sphere.center - ray.origin);
-    let c = (sphere.center - ray.origin).l2_norm_squared() - sphere.radius.powi(2);
-    b.powi(2) - 4.0 * a * c >= 0.0
+    let h = ray.direction.dot(oc);
+    let c = oc.l2_norm_squared() - sphere.radius.powi(2);
+    let discriminant = h.powi(2) - a * c;
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (h - discriminant.sqrt()) / a
+    }
 }
