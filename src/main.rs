@@ -59,7 +59,7 @@ fn ray_colour(sphere: Sphere, ray: Ray) -> Pixel {
     let p = sphere.intersection(ray, 0.0, f64::MAX);
     match p {
         Some(p) => {
-            let colour_map = 255.0 * (1.0 + sphere.normal(p)) / 2.0;
+            let colour_map = 255.0 * (1.0 + sphere.outwards_normal(p)) / 2.0;
             Pixel::new(colour_map.x as u8, colour_map.y as u8, colour_map.z as u8)
         },
         None => {

@@ -40,7 +40,7 @@ impl Surface for Sphere {
         t.and_then(|x| Some(ray.at(x)))
     }
 
-    fn normal(&self, point: Point) -> Vector {
+    fn outwards_normal(&self, point: Point) -> Vector {
         (point - self.center) / self.radius
     }
 }
@@ -123,7 +123,7 @@ mod tests {
             5.0,
         );
         let point = Point::new(3.0, 4.0, 0.0);
-        assert_eq!(sphere.normal(point).l2_norm(), 1.0);
+        assert_eq!(sphere.outwards_normal(point).l2_norm(), 1.0);
     }
 
     #[test]
@@ -135,7 +135,7 @@ mod tests {
         let point = Point::new(1.0, 0.0, 0.0);
         let e2 = Vector::new(0.0, 1.0, 0.0);
         let e3 = Vector::new(0.0, 0.0, 1.0);
-        assert_eq!(sphere.normal(point).dot(e2), 0.0);
-        assert_eq!(sphere.normal(point).dot(e3), 0.0);
+        assert_eq!(sphere.outwards_normal(point).dot(e2), 0.0);
+        assert_eq!(sphere.outwards_normal(point).dot(e3), 0.0);
     }
 }
