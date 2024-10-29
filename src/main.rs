@@ -56,7 +56,9 @@ fn main() {
 }
 
 fn ray_colour(sphere: Sphere, ray: Ray) -> Pixel {
-    let p = sphere.intersection(ray, 0.0, f64::MAX);
+    let p = sphere
+        .intersection(ray, 0.0, f64::MAX)
+        .and_then(|t| Some(ray.at(t)));
     match p {
         Some(p) => {
             let colour_map = 255.0 * (1.0 + sphere.outwards_normal(p)) / 2.0;

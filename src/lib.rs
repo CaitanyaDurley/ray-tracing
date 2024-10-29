@@ -16,6 +16,7 @@ pub use geometry::{
     Ray,
     surface::{
         Surface,
+        SurfaceSet,
         sphere::Sphere,
     },
 };

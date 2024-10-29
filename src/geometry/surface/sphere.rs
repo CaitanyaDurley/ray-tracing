@@ -23,7 +23,7 @@ impl Sphere {
 }
 
 impl Surface for Sphere {
-    fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<Point> {
+    fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<f64> {
         let oc = self.center - ray.origin;
         let a = ray.direction.l2_norm_squared();
         let h = ray.direction.dot(oc);
@@ -33,11 +33,10 @@ impl Surface for Sphere {
             return None
         }
         let discriminant_sqrt = discriminant.sqrt();
-        let t = [-1.0, 1.0].into_iter()
+        [-1.0, 1.0].into_iter()
             .map(|s| (h + s * discriminant_sqrt) / a)
             .filter(|t| t_min <= *t && *t <= t_max)
-            .next();
-        t.and_then(|x| Some(ray.at(x)))
+            .next()
     }
 
     fn outwards_normal(&self, point: Point) -> Vector {
@@ -78,10 +77,7 @@ mod tests {
             Point::new(2.0, 1.0, 0.0),
             1.0,
         );
-        assert_eq!(
-            sphere.intersection(ray, 0.0, f64::MAX),
-            Some(Point::new(2.0, 0.0, 0.0))
-        );
+        assert_eq!(sphere.intersection(ray, 0.0, f64::MAX), Some(2.0));
     }
 
     #[test]
@@ -94,10 +90,7 @@ mod tests {
             Point::new(2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(
-            sphere.intersection(ray, 0.0, f64::MAX),
-            Some(Point::new(1.0, 0.0, 0.0))
-        );
+        assert_eq!(sphere.intersection(ray, 0.0, f64::MAX), Some(1.0));
     }
 
     #[test]
@@ -110,10 +103,7 @@ mod tests {
             Point::new(2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(
-            sphere.intersection(ray, 1.5, f64::MAX),
-            Some(Point::new(3.0, 0.0, 0.0))
-        );
+        assert_eq!(sphere.intersection(ray, 1.5, f64::MAX), Some(3.0));
     }
 
     #[test]
