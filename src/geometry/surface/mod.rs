@@ -1,7 +1,5 @@
 pub mod sphere;
 
-use std::rc::Rc;
-
 use crate::geometry::{Vector, Point, Ray};
 
 /// The trait all renderable surfaces must implement
@@ -29,7 +27,7 @@ pub trait Surface {
 }
 
 pub struct SurfaceSet {
-    surfaces: Vec<Rc<dyn Surface>>,
+    surfaces: Vec<Box<dyn Surface>>,
 }
 
 impl SurfaceSet {
@@ -39,7 +37,7 @@ impl SurfaceSet {
         }
     }
 
-    pub fn add(&mut self, surface: Rc<dyn Surface>) {
+    pub fn add(&mut self, surface: Box<dyn Surface>) {
         self.surfaces.push(surface);
     }
 
@@ -49,16 +47,28 @@ impl SurfaceSet {
 
     /// Determines the first time t (if any) at which the
     /// `Ray` intersects any `Surface` for t_min <= t <= t_max
-    pub fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<f64> {
+    pub fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<SurfaceSetIntersection> {
         let mut out = None;
         self.surfaces.iter().fold(t_max, |t, s| {
             let hit = match s.intersection(ray, t_min, t) {
                 Some(p) => p,
                 None => return t,
             };
-            out.replace(hit);
+            if hit < t || out.is_none() {
+                out.replace(SurfaceSetIntersection {
+                    t: hit,
+                    surfaces: vec![s],
+                });
+            } else {
+                out.as_mut().unwrap().surfaces.push(s)
+            };
             hit
         });
         out
     }
+}
+
+pub struct SurfaceSetIntersection<'a> {
+    pub t: f64,
+    pub surfaces: Vec<&'a Box<dyn Surface>>,
 }

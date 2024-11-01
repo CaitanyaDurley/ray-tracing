@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use ray_tracing::{Point, Ray, Surface, SurfaceSet, Vector};
 
 struct DummySurface {
@@ -54,19 +52,20 @@ fn ray_opposite_direction_of_outwards_normal() {
 
 #[test]
 fn surface_set_intersection_returns_first() {
-    let first_surface = DummySurface {
+    let first_surface = Box::new(DummySurface {
         border: 2.0,
-    };
-    let second_surface = DummySurface {
+    });
+    let second_surface = Box::new(DummySurface {
         border: 3.0,
-    };
+    });
     let mut surface_set = SurfaceSet::new();
-    surface_set.add(Rc::new(first_surface));
-    surface_set.add(Rc::new(second_surface));
+    surface_set.add(first_surface);
+    surface_set.add(second_surface);
     let ray = Ray {
         origin: Point::new(0.0, 0.0, 0.0),
         direction: Vector::new(1.0, 0.0, 0.0),
     };
-    let t = surface_set.intersection(ray, 0.0, 4.0);
-    assert_eq!(t, Some(2.0));
+    let surface_set_intersection = surface_set.intersection(ray, 0.0, 4.0).unwrap();
+    assert_eq!(surface_set_intersection.t, 2.0);
+    assert_eq!(surface_set_intersection.surfaces.len(), 1);
 }

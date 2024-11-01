@@ -17,6 +17,7 @@ pub use geometry::{
     surface::{
         Surface,
         SurfaceSet,
+        SurfaceSetIntersection,
         sphere::Sphere,
     },
 };
