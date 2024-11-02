@@ -1,24 +1,27 @@
 mod image;
 mod geometry;
+mod camera;
 
-pub use image::{
-    Pixel,
-    Image,
-    formatter::{
-        ImageFormatter,
-        ppm::PPMFormatter,
+pub use self::{
+    image::{
+        Pixel,
+        Image,
+        formatter::{
+            ImageFormatter,
+            ppm::PPMFormatter,
+        },
     },
-};
-
-pub use geometry::{
-    Point,
-    Vector,
-    Ray,
-    Interval,
-    surface::{
-        Surface,
-        SurfaceSet,
-        SurfaceSetIntersection,
-        sphere::Sphere,
+    geometry::{
+        Point,
+        Vector,
+        Ray,
+        Interval,
+        surface::{
+            Surface,
+            SurfaceSet,
+            SurfaceSetIntersection,
+            sphere::Sphere,
+        },
     },
+    camera::Camera,
 };
