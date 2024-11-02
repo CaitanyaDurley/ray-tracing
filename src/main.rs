@@ -1,4 +1,14 @@
-use ray_tracing::{Image, PPMFormatter, Pixel, Point, Ray, Sphere, SurfaceSet, Vector};
+use ray_tracing::{
+    Image,
+    PPMFormatter,
+    Pixel,
+    Point,
+    Ray,
+    Sphere,
+    SurfaceSet,
+    Vector,
+    Interval,
+};
 
 use std::{fs::File, path::Path};
 
@@ -64,7 +74,8 @@ fn main() {
 }
 
 fn ray_colour(world: &SurfaceSet, ray: Ray) -> Pixel {
-    let intersection = world.intersection(ray, 0.0, f64::MAX);
+    let intersection = world
+        .intersection(ray, Interval::positive_reals());
     if intersection.is_none() {
         let scale_factor = (ray.direction.unit().y + 1.0) / 2.0;
         let whiteout = ((1.0 - scale_factor) * 255.0) as u8;

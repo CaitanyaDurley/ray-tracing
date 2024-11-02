@@ -1,12 +1,12 @@
 pub mod sphere;
 
-use crate::geometry::{Vector, Point, Ray};
+use crate::geometry::{Vector, Point, Ray, Interval};
 
 /// The trait all renderable surfaces must implement
 pub trait Surface {
-    /// Determines the first time t (if any) at which the
-    /// `Ray` intersects this `Surface` for t_min <= t <= t_max
-    fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<f64>;
+    /// Determines the first time (if any) at which the
+    /// `Ray` intersects this `Surface` in the `time_interval`
+    fn intersection(&self, ray: Ray, time_interval: Interval) -> Option<f64>;
     /// Given a `Point` on the `Surface`, return the *unit* vector normal
     /// to the `Surface` at that `Point`. The normal should point out of
     /// the object defined by this surface (where this makes sense)
@@ -45,24 +45,27 @@ impl SurfaceSet {
         self.surfaces.clear();
     }
 
-    /// Determines the first time t (if any) at which the
-    /// `Ray` intersects any `Surface` for t_min <= t <= t_max
-    pub fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<SurfaceSetIntersection> {
+    /// Determines the first time (if any) at which the
+    /// `Ray` intersects any `Surface` in the `time_interval`
+    pub fn intersection(&self, ray: Ray, time_interval: Interval) -> Option<SurfaceSetIntersection> {
         let mut out = None;
-        self.surfaces.iter().fold(t_max, |t, s| {
-            let hit = match s.intersection(ray, t_min, t) {
-                Some(p) => p,
-                None => return t,
+        self.surfaces.iter().fold(time_interval, |window, s| {
+            let t = match s.intersection(ray, window) {
+                Some(t) => t,
+                None => return window,
             };
-            if hit < t || out.is_none() {
+            if t < window.max || out.is_none() {
                 out.replace(SurfaceSetIntersection {
-                    t: hit,
+                    t,
                     surfaces: vec![s],
                 });
             } else {
-                out.as_mut().unwrap().surfaces.push(s)
-            };
-            hit
+                out.as_mut().unwrap().surfaces.push(s);
+            }
+            Interval {
+                min: time_interval.min,
+                max: t,
+            }
         });
         out
     }

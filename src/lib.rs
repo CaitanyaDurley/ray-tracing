@@ -14,6 +14,7 @@ pub use geometry::{
     Point,
     Vector,
     Ray,
+    Interval,
     surface::{
         Surface,
         SurfaceSet,

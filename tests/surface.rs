@@ -1,16 +1,14 @@
-use ray_tracing::{Point, Ray, Surface, SurfaceSet, Vector};
+use ray_tracing::{Point, Ray, Surface, SurfaceSet, Vector, Interval};
 
 struct DummySurface {
     border: f64,
 }
 
 impl Surface for DummySurface {
-    fn intersection(&self, _ray: Ray, t_min: f64, t_max: f64) -> Option<f64> {
-        if t_min <= self.border && self.border <= t_max {
-            Some(self.border)
-        } else {
-            None
-        }
+    fn intersection(&self, _ray: Ray, time_interval: Interval) -> Option<f64> {
+        time_interval
+            .contains(self.border)
+            .then_some(self.border)
     }
 
     fn outwards_normal(&self, _point: Point) -> Vector {
@@ -65,7 +63,9 @@ fn surface_set_intersection_returns_first() {
         origin: Point::new(0.0, 0.0, 0.0),
         direction: Vector::new(1.0, 0.0, 0.0),
     };
-    let surface_set_intersection = surface_set.intersection(ray, 0.0, 4.0).unwrap();
+    let surface_set_intersection = surface_set
+        .intersection(ray, Interval::positive_reals())
+        .unwrap();
     assert_eq!(surface_set_intersection.t, 2.0);
     assert_eq!(surface_set_intersection.surfaces.len(), 1);
 }

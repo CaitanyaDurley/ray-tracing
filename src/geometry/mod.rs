@@ -231,3 +231,71 @@ impl Ray {
         self.origin + self.direction * t
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Interval {
+    pub min: f64,
+    pub max: f64,
+}
+
+impl Interval {
+    /// Returns the interval containing all reals (-ve infty to +ve infty)
+    pub fn all_reals() -> Self {
+        Self {
+            min: f64::MIN,
+            max: f64::MAX,
+        }
+    }
+
+    /// Returns the interval containing all positive reals (0 to +ve infty)
+    pub fn positive_reals() -> Self {
+        Self {
+            min: 0.0,
+            max: f64::MAX,
+        }
+    }
+
+    /// Returns the size of the `Interval`
+    /// # Example
+    /// ```
+    /// use ray_tracing::Interval;
+    /// let interval = Interval {
+    ///     min: 3.0,
+    ///     max: 5.5,
+    /// };
+    /// assert_eq!(interval.size(), 2.5)
+    /// ```
+    pub fn size(&self) -> f64 {
+        self.max - self.min
+    }
+
+    /// Tests if `num` lies within the *closed* `Interval`
+    /// # Example
+    /// ```
+    /// use ray_tracing::Interval;
+    /// let interval = Interval {
+    ///     min: 3.0,
+    ///     max: 5.5,
+    /// };
+    /// assert!(interval.contains(4.0));
+    /// assert!(interval.contains(5.5));
+    /// ```
+    pub fn contains(&self, num: f64) -> bool {
+        self.min <= num && num <= self.max
+    }
+
+        /// Tests if `num` lies within the *open* `Interval`
+    /// # Example
+    /// ```
+    /// use ray_tracing::Interval;
+    /// let interval = Interval {
+    ///     min: 3.0,
+    ///     max: 5.5,
+    /// };
+    /// assert!(interval.contains_strict(4.0));
+    /// assert!(!interval.contains_strict(5.5));
+    /// ```
+    pub fn contains_strict(&self, num: f64) -> bool {
+        self.min < num && num < self.max
+    }
+}

@@ -1,8 +1,6 @@
-use crate::geometry::surface::{
-    Surface,
-    Vector,
-    Point,
-    Ray,
+use crate::geometry::{
+    Interval,
+    surface::{ Surface, Vector, Point, Ray },
 };
 
 
@@ -23,7 +21,7 @@ impl Sphere {
 }
 
 impl Surface for Sphere {
-    fn intersection(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<f64> {
+    fn intersection(&self, ray: Ray, time_interval: Interval) -> Option<f64> {
         let oc = self.center - ray.origin;
         let a = ray.direction.l2_norm_squared();
         let h = ray.direction.dot(oc);
@@ -35,7 +33,7 @@ impl Surface for Sphere {
         let discriminant_sqrt = discriminant.sqrt();
         [-1.0, 1.0].into_iter()
             .map(|s| (h + s * discriminant_sqrt) / a)
-            .filter(|t| t_min <= *t && *t <= t_max)
+            .filter(|t| time_interval.contains(*t))
             .next()
     }
 
@@ -64,7 +62,7 @@ mod tests {
             Point::new(-2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, 0.0, f64::MAX), None);
+        assert_eq!(sphere.intersection(ray, Interval::positive_reals()), None);
     }
 
     #[test]
@@ -77,7 +75,7 @@ mod tests {
             Point::new(2.0, 1.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, 0.0, f64::MAX), Some(2.0));
+        assert_eq!(sphere.intersection(ray, Interval::positive_reals()), Some(2.0));
     }
 
     #[test]
@@ -90,7 +88,7 @@ mod tests {
             Point::new(2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, 0.0, f64::MAX), Some(1.0));
+        assert_eq!(sphere.intersection(ray, Interval::positive_reals()), Some(1.0));
     }
 
     #[test]
@@ -103,7 +101,11 @@ mod tests {
             Point::new(2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, 1.5, f64::MAX), Some(3.0));
+        let window = Interval {
+            min: 1.5,
+            max: f64::MAX,
+        };
+        assert_eq!(sphere.intersection(ray, window), Some(3.0));
     }
 
     #[test]
