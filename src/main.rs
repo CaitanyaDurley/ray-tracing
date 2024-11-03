@@ -16,13 +16,7 @@ fn main() {
     let focal_length = 1.0;
     let viewport_height = 2.0;
     let viewport_width = viewport_height * image_width as f64 / image_height as f64;
-    let camera = Camera {
-        image_width,
-        image_height,
-        viewport_width,
-        viewport_height,
-        focal_length,
-    };
+    let camera = Camera::new(image_width, image_height, viewport_width, viewport_height, focal_length, 16);
     let mut world = SurfaceSet::new();
     world.add(Box::new(Sphere::new(
         Point::new(0.0, 0.0, -1.0),

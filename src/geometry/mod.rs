@@ -1,6 +1,6 @@
 pub mod surface;
 
-use std::ops::{Add, Div, Mul, Sub};
+use std::{iter::Sum, ops::{Add, Div, Mul, Sub}};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vector {
@@ -17,6 +17,10 @@ impl Vector {
             y,
             z,
         }
+    }
+
+    pub fn zero() -> Self {
+        Vector::new(0.0, 0.0, 0.0)
     }
 
     /// Returns the dot product of self and rhs
@@ -212,6 +216,12 @@ impl Div<f64> for Vector {
     }
 }
 
+impl Sum for Vector {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Vector::zero(), |a, b| a + b)
+    }
+}
+
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Ray {
@@ -239,7 +249,7 @@ pub struct Interval {
 }
 
 impl Interval {
-    /// Returns the interval containing all reals (-ve infty to +ve infty)
+    /// Returns the interval containing all reals [-infty, +infty]
     pub fn all_reals() -> Self {
         Self {
             min: f64::MIN,
@@ -247,11 +257,19 @@ impl Interval {
         }
     }
 
-    /// Returns the interval containing all positive reals (0 to +ve infty)
+    /// Returns the interval containing all positive reals [0, +infty]
     pub fn positive_reals() -> Self {
         Self {
             min: 0.0,
             max: f64::MAX,
+        }
+    }
+
+    /// Returns the empty interval [0.0, 0.0]
+    pub fn empty() -> Self {
+        Self {
+            min: 0.0,
+            max: 0.0,
         }
     }
 
