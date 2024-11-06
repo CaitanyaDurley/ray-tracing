@@ -5,7 +5,7 @@ use formatter::ImageFormatter;
 use std::fs::File;
 use std::io::{self, Write};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Pixel {
     red: u8,
     green: u8,
@@ -49,34 +49,48 @@ impl From<Pixel> for u32 {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Image {
+/// A logical height x width grid of `Pixel`s
+/// The pixels are stored internally as an iterator for memory efficiency
+/// It is up to `ImageFormatter`s to deal with this as necessary (worst case
+/// is just `image.pixels.collect()`)
+pub struct Image<'a> {
     pub height: u16,
     pub width: u16,
-    pixels: Vec<Pixel>,
+    pixels: Box<dyn 'a + Iterator<Item = Pixel>>,
 }
 
-impl Image {
-    pub fn new<F>(height: u16, width: u16, colour: F) -> Self
+
+impl<'a> Image<'a> {
+    /// Create an `Image` from a colour generator closure
+    /// `colour`'s first argument is the column `Pixel` index (i.e. in the horizontal direction)
+    /// `colour`'s second argument is the row `Pixel` index (i.e. in the vertical direction)
+    /// # Example
+    /// ```
+    /// use ray_tracing::{Pixel, Image};
+    /// let colour = |col, row| Pixel::new(0, 100 * row as u8, 50 * col as u8);
+    /// let image = Image::new(2, 3, &colour);
+    /// let pixels = image.collect();
+    /// assert_eq!(pixels[0], Pixel::black());
+    /// assert_eq!(pixels[4], Pixel::new(0, 100, 50));
+    /// ```
+    pub fn new<F>(height: u16, width: u16, colour: &'a F) -> Self
         where F: Fn(u16, u16) -> Pixel
     {
-        let size = (width as usize) * (height as usize);
-        let mut pixels = Vec::with_capacity(size);
-        for r in 0..height {
-            for c in 0..width {
-                pixels.push(colour(c, r))
-            }
-        }
+        let pixels = (0..height).flat_map(move |r| (0..width).map(move |c| colour(c, r)));
         Self {
             height,
             width,
-            pixels,
+            pixels: Box::new(pixels),
         }
     }
 
-    pub fn write_to_file<T: ImageFormatter>(&self, f: &mut File, formatter: &mut T) -> io::Result<()> {
+    pub fn collect(self) -> Vec<Pixel> {
+        self.pixels.collect()
+    }
+
+    pub fn write_to_file<T: ImageFormatter>(self, f: &mut File, formatter: &mut T) -> io::Result<()> {
         let mut stdout = io::stdout();
-        let size = formatter.len(self) as f64;
+        let size = formatter.len(&self) as f64;
         let mut count= 0;
         for data in formatter.get_bytes(self) {
             f.write_all(&data)?;
@@ -116,14 +130,14 @@ mod tests {
 
     #[test]
     fn new_image_has_correct_num_pixels() {
-        let image = Image::new(3, 4, |_r, _c| Pixel::black());
-        assert_eq!(image.pixels.len(), 12);
+        let image = Image::new(3, 4, &|_c, _r| Pixel::black());
+        assert_eq!(image.collect().len(), 12);
     }
 
     #[test]
     fn very_large_image() {
         let width = u16::MAX;
-        let image = Image::new(1, width, |_r, _c| Pixel::black());
-        assert_eq!(image.pixels.len(), width.into());
+        let image = Image::new(1, width, &|_c, _r| Pixel::black());
+        assert_eq!(image.collect().len(), width.into());
     }
 }

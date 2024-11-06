@@ -1,4 +1,5 @@
 use crate::image::{
+    Pixel,
     Image,
     formatter::ImageFormatter,
 };
@@ -27,10 +28,15 @@ impl PPMFormatter {
 }
 
 impl ImageFormatter for PPMFormatter {
-    fn get_bytes(&mut self, image: &Image) -> impl Iterator<Item = Vec<u8>> {
+    fn get_bytes(&mut self, image: Image) -> impl Iterator<Item = Vec<u8>> {
+        let pixel_to_bytes = if self.ascii_mode {
+            |pixel: Pixel| format!("{} {} {}\n", pixel.red, pixel.green, pixel.blue).into_bytes()
+        } else {
+            |pixel: Pixel| vec![pixel.red, pixel.green, pixel.blue]
+        };
         Iterator::chain(
-            iter::once(self.header(image).into_bytes()),
-            PPMIterator::new(self.ascii_mode, image)
+            iter::once(self.header(&image).into_bytes()),
+            image.pixels.map(pixel_to_bytes),
         )
     }
     
@@ -47,39 +53,6 @@ impl ImageFormatter for PPMFormatter {
     
 }
 
-struct PPMIterator<'a> {
-    ascii_mode: bool,
-    image: &'a Image,
-    ix: u32,
-}
-
-impl<'a> PPMIterator<'a> {
-    fn new(ascii_mode: bool, image: &'a Image) -> Self {
-        Self {
-            ascii_mode,
-            image,
-            ix: 0,
-        }
-    }
-}
-
-impl<'a> Iterator for PPMIterator<'a> {
-    type Item = Vec<u8>;
-    
-    fn next(&mut self) -> Option<Self::Item> {
-        // return None
-        if self.ix == (self.image.height as u32) * (self.image.width as u32) {
-            return None
-        }
-        let pixel = self.image.pixels[self.ix as usize];
-        self.ix += 1;
-        Some(if self.ascii_mode {
-            format!("{} {} {}\n", pixel.red, pixel.green, pixel.blue).into_bytes()
-        } else {
-            vec![pixel.red, pixel.green, pixel.blue]
-        })
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -89,24 +62,24 @@ mod tests {
     #[test]
     fn binary_mode_header() {
         let mut f = PPMFormatter::new(false);
-        let image = Image::new(1, 2, |_r, _c| Pixel::black());
-        let header = f.get_bytes(&image).next();
+        let image = Image::new(1, 2, &|_c, _r| Pixel::black());
+        let header = f.get_bytes(image).next();
         assert_eq!(header, Some(b"P6\n2 1\n255\n".to_vec()));
     }
 
     #[test]
     fn ascii_mode_header() {
         let mut f = PPMFormatter::new(true);
-        let image = Image::new(1, 2, |_r, _c| Pixel::black());
-        let header = f.get_bytes(&image).next();
+        let image = Image::new(1, 2, &|_c, _r| Pixel::black());
+        let header = f.get_bytes(image).next();
         assert_eq!(header, Some(b"P3\n2 1\n255\n".to_vec()));
     }
 
     #[test]
     fn ascii_mode_ends_with_newline() {
         let mut f = PPMFormatter::new(true);
-        let image = Image::new(1, 2, |_r, _c| Pixel::black());
-        let last = f.get_bytes(&image).last().unwrap();
+        let image = Image::new(1, 2, &|_c, _r| Pixel::black());
+        let last = f.get_bytes(image).last().unwrap();
         assert_eq!(last[last.len() - 1], b'\n');
     }
 }
