@@ -94,7 +94,7 @@ impl Camera {
             let avg = 255.0 * normal_sum / (self.antialiasing as f64 + 1.0);
             Pixel::new(avg.x as u8, avg.y as u8, avg.z as u8)
         };
-        let image = Image::new(self.image_height, self.image_width, colour_generator);
+        let image = Image::new(self.image_height, self.image_width, &colour_generator);
         let mut ppm_formatter = PPMFormatter::new(true);
         let mut f = File::create(file_name)?;
         image.write_to_file(&mut f, &mut ppm_formatter)
