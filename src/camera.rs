@@ -116,7 +116,7 @@ fn ray_colour(world: &SurfaceSet, ray: Ray) -> Vector {
     let intersection = world
         .intersection(ray, Interval::positive_reals());
     if intersection.is_none() {
-        let whiteout = 1.0 - (ray.direction.unit().y + 1.0) / 2.0;
+        let whiteout = 1.0 - (ray.direction.to_unit().y + 1.0) / 2.0;
         return Vector::new(whiteout, whiteout, 1.0)
     }
     let intersection = intersection.unwrap();
