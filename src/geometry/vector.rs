@@ -1,4 +1,6 @@
 use std::{
+    cmp::Ordering,
+    convert::identity,
     iter::Sum,
     ops::{Add, Div, Mul, Sub}
 };
@@ -205,6 +207,79 @@ impl Sum for Vector {
 }
 
 
+impl PartialEq<f64> for Vector {
+    fn eq(&self, other: &f64) -> bool {
+        let other = *other;
+        self.x == other && self.y == other && self.z == other
+    }
+}
+
+
+impl PartialEq<Vector> for f64 {
+    fn eq(&self, other: &Vector) -> bool {
+        other.eq(self)
+    }
+}
+
+
+impl PartialOrd for Vector {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        [self.x, self.y, self.z].into_iter()
+            .zip([other.x, other.y, other.z])
+            .map(|(s, o)| s.partial_cmp(&o))
+            .reduce(|a, e| if a == e {
+                a
+            } else {
+                None
+            })
+            .unwrap()
+    }
+    
+    fn le(&self, other: &Self) -> bool {
+        [self.x, self.y, self.z].into_iter()
+            .zip([other.x, other.y, other.z])
+            .map(|(s, o)| s <= o)
+            .all(identity)
+    }
+    
+    fn ge(&self, other: &Self) -> bool {
+        [self.x, self.y, self.z].into_iter()
+            .zip([other.x, other.y, other.z])
+            .map(|(s, o)| s >= o)
+            .all(identity)
+    }    
+}
+
+
+impl PartialOrd<f64> for Vector {
+    fn partial_cmp(&self, other: &f64) -> Option<Ordering> {
+        self.partial_cmp(&Vector::new(*other, *other, *other))
+    }
+    
+    fn le(&self, other: &f64) -> bool {
+        self.le(&Vector::new(*other, *other, *other))
+    }
+    
+    fn ge(&self, other: &f64) -> bool {
+        self.ge(&Vector::new(*other, *other, *other))
+    }
+}
+
+
+impl PartialOrd<Vector> for f64 {
+    fn partial_cmp(&self, other: &Vector) -> Option<Ordering> {
+        Vector::new(*self, *self, *self).partial_cmp(other)
+    }
+    
+    fn le(&self, other: &Vector) -> bool {
+        other.ge(self)
+    }
+    
+    fn ge(&self, other: &Vector) -> bool {
+        other.le(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -287,5 +362,116 @@ mod tests {
             Vector::new(7.0, 8.0, 9.0),
         ].into_iter().sum();
         assert_eq!(s, Vector::new(12.0, 15.0 , 18.0))
+    }
+
+    #[test]
+    fn vector_eq_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = a.clone();
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn vector_ne_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = a + 1.0;
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn vector_eq_float() {
+        let a = Vector::new(1.0, 1.0, 1.0);
+        assert_eq!(a, 1.0);
+    }
+
+    #[test]
+    fn vector_ne_float() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 1.0;
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn vector_lt_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = a - 1.0;
+        assert!(b < a)
+    }
+
+    #[test]
+    fn vector_le_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = Vector::new(1.0, 1.9, 3.0);
+        assert!(b <= a)
+    }
+
+    #[test]
+    fn vector_gt_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = a + 1.0;
+        assert!(b > a)
+    }
+
+    #[test]
+    fn vector_ge_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = Vector::new(1.0, 2.1, 3.0);
+        assert!(b >= a)
+    }
+
+    #[test]
+    fn vector_lt_float() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 4.0;
+        assert!(a < b)
+    }
+
+    #[test]
+    fn vector_le_float() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 3.0;
+        assert!(a <= b)
+    }
+
+    #[test]
+    fn vector_gt_float() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 0.0;
+        assert!(a > b)
+    }
+
+    #[test]
+    fn vector_ge_float() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 1.0;
+        assert!(a >= b)
+    }
+
+    #[test]
+    fn float_lt_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 0.0;
+        assert!(b < a)
+    }
+
+    #[test]
+    fn float_le_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 1.0;
+        assert!(b <= a)
+    }
+
+    #[test]
+    fn float_gt_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 4.0;
+        assert!(b > a)
+    }
+
+    #[test]
+    fn float_ge_vector() {
+        let a = Vector::new(1.0, 2.0, 3.0);
+        let b = 3.0;
+        assert!(b >= a)
     }
 }
