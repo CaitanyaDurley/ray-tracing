@@ -21,11 +21,15 @@ pub trait Surface {
         - n.dot(ray.direction).signum() * n
     }
     /// Given a `Point` on the `Surface` and an incident `Ray`, return
-    /// a random *unit* reflection vector from that Point. 
-    fn random_reflection(&self, point: Point, ray: Ray) -> Vector {
+    /// a random reflection from that Point. The reflected Ray's direction
+    /// is guaranteed to be of unit length.
+    fn random_reflection(&self, point: Point, ray: Ray) -> Ray {
         let n = self.normal_against_ray(point, ray);
         let v = Vector::random_unit();
-        v.dot(n).signum() * v
+        Ray {
+            origin: point,
+            direction: v.dot(n).signum() * v,
+        }
     }
 }
 

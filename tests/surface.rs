@@ -58,8 +58,8 @@ fn random_reflection_for_ray_in_direction_of_outwards_normal() {
         origin,
         direction: Vector::new(2.0, 3.0, 4.0),
     };
-    let v = surface.random_reflection(origin, ray);
-    assert!(v.x <= 0.0)
+    let r = surface.random_reflection(origin, ray);
+    assert!(r.direction.x <= 0.0)
 }
 
 #[test]
@@ -72,8 +72,8 @@ fn random_reflection_for_ray_in_opposite_direction_of_outwards_normal() {
         origin,
         direction: Vector::new(-2.0, 3.0, 4.0),
     };
-    let v = surface.random_reflection(origin, ray);
-    assert!(v.x >= 0.0)
+    let r = surface.random_reflection(origin, ray);
+    assert!(r.direction.x >= 0.0)
 }
 
 #[test]
