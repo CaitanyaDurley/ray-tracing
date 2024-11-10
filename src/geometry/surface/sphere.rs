@@ -45,6 +45,7 @@ impl Surface for Sphere {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::geometry::IntervalBounds;
 
     #[test]
     #[should_panic(expected = "assertion failed: radius > 0.0")]
@@ -62,7 +63,10 @@ mod tests {
             Point::new(-2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, Interval::positive_reals()), None);
+        assert_eq!(
+            sphere.intersection(ray, Interval::positive_reals(IntervalBounds::Open)),
+            None
+        );
     }
 
     #[test]
@@ -75,7 +79,10 @@ mod tests {
             Point::new(2.0, 1.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, Interval::positive_reals()), Some(2.0));
+        assert_eq!(
+            sphere.intersection(ray, Interval::positive_reals(IntervalBounds::Open)),
+            Some(2.0)
+        );
     }
 
     #[test]
@@ -88,7 +95,10 @@ mod tests {
             Point::new(2.0, 0.0, 0.0),
             1.0,
         );
-        assert_eq!(sphere.intersection(ray, Interval::positive_reals()), Some(1.0));
+        assert_eq!(
+            sphere.intersection(ray, Interval::positive_reals(IntervalBounds::Open)),
+            Some(1.0)
+        );
     }
 
     #[test]
@@ -101,10 +111,7 @@ mod tests {
             Point::new(2.0, 0.0, 0.0),
             1.0,
         );
-        let window = Interval {
-            min: 1.5,
-            max: f64::MAX,
-        };
+        let window = Interval::new(1.0, 3.0, IntervalBounds::LeftOpenRightClosed);
         assert_eq!(sphere.intersection(ray, window), Some(3.0));
     }
 

@@ -16,6 +16,7 @@ pub use self::{
         Vector,
         Ray,
         Interval,
+        IntervalBounds,
         surface::{
             Surface,
             SurfaceSet,

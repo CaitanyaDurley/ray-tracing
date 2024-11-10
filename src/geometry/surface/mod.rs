@@ -1,6 +1,6 @@
 pub mod sphere;
 
-use crate::geometry::{Vector, Point, Ray, Interval};
+use crate::geometry::{Vector, Point, Ray, Interval, IntervalBounds};
 
 /// The trait all renderable surfaces must implement
 pub trait Surface {
@@ -55,24 +55,27 @@ impl SurfaceSet {
     /// Determines the first time (if any) at which the
     /// `Ray` intersects any `Surface` in the `time_interval`
     pub fn intersection(&self, ray: Ray, time_interval: Interval) -> Option<SurfaceSetIntersection> {
-        let mut out = None;
+        let subsequent_bounds = match time_interval.bounds {
+            IntervalBounds::Open => IntervalBounds::LeftOpenRightClosed,
+            IntervalBounds::Closed => IntervalBounds::Closed,
+            IntervalBounds::LeftOpenRightClosed => IntervalBounds::LeftOpenRightClosed,
+            IntervalBounds::LeftClosedRightOpen => IntervalBounds::Closed,
+        };
+        let mut out: Option<SurfaceSetIntersection<'_>> = None;
         self.surfaces.iter().fold(time_interval, |window, s| {
             let t = match s.intersection(ray, window) {
                 Some(t) => t,
                 None => return window,
             };
-            if t < window.max || out.is_none() {
+            if t == window.max && out.is_some() {
+                out.as_mut().unwrap().surfaces.push(s);
+            } else {
                 out.replace(SurfaceSetIntersection {
                     t,
                     surfaces: vec![s],
                 });
-            } else {
-                out.as_mut().unwrap().surfaces.push(s);
             }
-            Interval {
-                min: time_interval.min,
-                max: t,
-            }
+            Interval::new(window.min, t, subsequent_bounds)
         });
         out
     }

@@ -9,6 +9,7 @@ use crate::{
         Vector,
         Ray,
         Interval,
+        IntervalBounds,
         surface::SurfaceSet,
     },
 };
@@ -82,10 +83,7 @@ impl Camera {
     pub fn render(&self, world: &SurfaceSet, file_name: &Path) -> io::Result<()> {
         let colour_generator = |x: u16, y: u16| {
             let direct_ray = self.build_ray(x, y, Interval::empty());
-            let diffusion = Interval {
-                min: -0.5,
-                max: 0.5,
-            };
+            let diffusion = Interval::new(-0.5, 0.5, IntervalBounds::Closed);
             let normal_sum: Vector = (0..self.antialiasing)
                 .map(|_| self.build_ray(x, y, diffusion))
                 .chain(iter::once(direct_ray))
@@ -101,8 +99,8 @@ impl Camera {
     }
 
     fn build_ray(&self, x: u16, y: u16, sample_space: Interval) -> Ray {
-        let x = (x as f64) + sample_space.min + sample_space.size() * rand::random::<f64>();
-        let y = (y as f64) + sample_space.min + sample_space.size() * rand::random::<f64>();
+        let x = (x as f64) + sample_space.min() + sample_space.size() * rand::random::<f64>();
+        let y = (y as f64) + sample_space.min() + sample_space.size() * rand::random::<f64>();
         Ray::from_two_points(
             self.eye_point,
             self.pixel00 + x * self.pixel_delta_u + y * self.pixel_delta_v
@@ -114,7 +112,7 @@ impl Camera {
 
 fn ray_colour(world: &SurfaceSet, ray: Ray) -> Vector {
     let intersection = world
-        .intersection(ray, Interval::positive_reals());
+        .intersection(ray, Interval::positive_reals(IntervalBounds::Open));
     if intersection.is_none() {
         let whiteout = 1.0 - (ray.direction.to_unit().y + 1.0) / 2.0;
         return Vector::new(whiteout, whiteout, 1.0)

@@ -1,4 +1,4 @@
-use ray_tracing::{Point, Ray, Surface, SurfaceSet, Vector, Interval};
+use ray_tracing::{Interval, IntervalBounds, Point, Ray, Surface, SurfaceSet, Vector};
 
 struct DummySurface {
     border: f64,
@@ -92,7 +92,7 @@ fn surface_set_intersection_returns_first() {
         direction: Vector::new(1.0, 0.0, 0.0),
     };
     let surface_set_intersection = surface_set
-        .intersection(ray, Interval::positive_reals())
+        .intersection(ray, Interval::positive_reals(IntervalBounds::Open))
         .unwrap();
     assert_eq!(surface_set_intersection.t, 2.0);
     assert_eq!(surface_set_intersection.surfaces.len(), 1);
