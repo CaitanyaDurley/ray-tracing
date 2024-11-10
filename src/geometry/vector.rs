@@ -28,6 +28,34 @@ impl Vector {
         Vector::new(0.0, 0.0, 0.0)
     }
 
+    /// Returns a random vector uniformly distributed in [low, high)^3
+    /// # Example
+    /// ```
+    /// use ray_tracing::Vector;
+    /// let v = Vector::random_within(0.0, 1.0);
+    /// assert!(0.0 <= v && v < 1.0)
+    /// ```
+    pub fn random_within(low: f64, high: f64) -> Self {
+        low + (high - low) * Vector::new(rand::random(), rand::random(), rand::random())
+    }
+
+    /// Returns a random unit vector
+    /// # Example
+    /// ```
+    /// use ray_tracing::Vector;
+    /// let v = Vector::random_unit();
+    /// assert!((v.l2_norm() - 1.0).abs() < 1e-12);
+    /// ```
+    pub fn random_unit() -> Self {
+        loop {
+            let v = Self::random_within(-1.0, 1.0);
+            let m = v.l2_norm();
+            if 0.0 < m && m <= 1.0 {
+                return v / m
+            }
+        }
+    }
+
     /// Returns the dot product of self and rhs
     /// # Example
     /// ```

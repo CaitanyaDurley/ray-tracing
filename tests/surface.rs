@@ -17,7 +17,7 @@ impl Surface for DummySurface {
 }
 
 #[test]
-fn ray_in_direction_of_outwards_normal() {
+fn normal_against_ray_in_direction_of_outwards_normal() {
     let surface = DummySurface {
         border: 3.0,
     };
@@ -33,7 +33,7 @@ fn ray_in_direction_of_outwards_normal() {
 }
 
 #[test]
-fn ray_opposite_direction_of_outwards_normal() {
+fn normal_against_ray_in_opposite_direction_of_outwards_normal() {
     let surface = DummySurface {
         border: 3.0,
     };
@@ -46,6 +46,34 @@ fn ray_opposite_direction_of_outwards_normal() {
         surface.normal_against_ray(origin, ray),
         Vector::new(1.0, 0.0, 0.0),
     );
+}
+
+#[test]
+fn random_reflection_for_ray_in_direction_of_outwards_normal() {
+    let surface = DummySurface {
+        border: 3.0,
+    };
+    let origin = Point::new(0.0, 0.0, 0.0);
+    let ray = Ray {
+        origin,
+        direction: Vector::new(2.0, 3.0, 4.0),
+    };
+    let v = surface.random_reflection(origin, ray);
+    assert!(v.x <= 0.0)
+}
+
+#[test]
+fn random_reflection_for_ray_in_opposite_direction_of_outwards_normal() {
+    let surface = DummySurface {
+        border: 3.0,
+    };
+    let origin = Point::new(0.0, 0.0, 0.0);
+    let ray = Ray {
+        origin,
+        direction: Vector::new(-2.0, 3.0, 4.0),
+    };
+    let v = surface.random_reflection(origin, ray);
+    assert!(v.x >= 0.0)
 }
 
 #[test]
