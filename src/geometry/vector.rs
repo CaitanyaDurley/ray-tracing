@@ -47,13 +47,10 @@ impl Vector {
     /// assert!((v.l2_norm() - 1.0).abs() < 1e-12);
     /// ```
     pub fn random_unit() -> Self {
-        loop {
-            let v = Self::random_within(-1.0, 1.0);
-            let m = v.l2_norm();
-            if 0.0 < m && m <= 1.0 {
-                return v / m
-            }
-        }
+        let incline = 2.0 * 3.141 * rand::random::<f64>();
+        let hypotenuse = incline.cos();
+        let rot = 2.0 * 3.141 * rand::random::<f64>();
+        Self::new(hypotenuse * rot.cos(), hypotenuse * rot.sin(), incline.sin())
     }
 
     /// Returns the dot product of self and rhs
