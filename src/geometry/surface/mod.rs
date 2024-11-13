@@ -22,13 +22,15 @@ pub trait Surface {
     }
     /// Given a `Point` on the `Surface` and an incident `Ray`, return
     /// a random reflection from that Point. The reflected Ray's direction
-    /// is guaranteed to be of unit length.
+    /// is guaranteed to be of unit length and has a distribution
+    /// proportional to the cosine of the angle between the incident ray
+    /// and the normal (against the ray) at the point of intersection.
     fn random_reflection(&self, point: Point, ray: Ray) -> Ray {
-        let n = self.normal_against_ray(point, ray);
-        let v = Vector::random_unit();
+        let direction = self.normal_against_ray(point, ray) +
+            Vector::random_unit();
         Ray {
             origin: point,
-            direction: v.dot(n).signum() * v,
+            direction,
         }
     }
 }
