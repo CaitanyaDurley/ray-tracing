@@ -33,11 +33,13 @@ pub struct Camera {
     pixel_delta_v: Vector,
     // The viewport's top-left pixel
     pixel00: Point,
+    // The maximum number of ray bounces
+    max_ray_bounces: u8,
 }
 
 impl Camera {
     pub fn new(image_width: u16, image_height: u16, viewport_width: f64,
-        viewport_height: f64, focal_length: f64, antialiasing: u8) -> Self
+        viewport_height: f64, focal_length: f64, antialiasing: u8, max_ray_bounces: u8) -> Self
     {
         let eye_point = Point {
             x: 0.0,
@@ -77,6 +79,7 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v,
             pixel00,
+            max_ray_bounces,
         }
     }
 
@@ -87,7 +90,7 @@ impl Camera {
             let normal_sum: Vector = (0..self.antialiasing)
                 .map(|_| self.build_ray(x, y, diffusion))
                 .chain(iter::once(direct_ray))
-                .map(|ray| ray_colour(&world, ray))
+                .map(|ray| ray_colour(&world, ray, self.max_ray_bounces))
                 .sum();
             let avg = 255.0 * normal_sum / (self.antialiasing as f64 + 1.0);
             Pixel::new(avg.x as u8, avg.y as u8, avg.z as u8)
@@ -110,15 +113,19 @@ impl Camera {
 }
 
 
-fn ray_colour(world: &SurfaceSet, ray: Ray) -> Vector {
+fn ray_colour(world: &SurfaceSet, ray: Ray, max_ray_bounces: u8) -> Vector {
+    if max_ray_bounces == 0 {
+        return Vector::zero()
+    }
     let intersection = world
-        .intersection(ray, Interval::positive_reals(IntervalBounds::Open));
+        .intersection(ray, Interval::new(0.001, f64::MAX, IntervalBounds::Open));
     if intersection.is_none() {
-        let whiteout = 1.0 - (ray.direction.to_unit().y + 1.0) / 2.0;
-        return Vector::new(whiteout, whiteout, 1.0)
+        let a = (ray.direction.to_unit().y + 1.0) / 2.0;
+        // return Vector::new(whiteout, whiteout, 1.0)
+        return (1.0 - a) * Vector::new(1.0, 1.0, 1.0) + a * Vector::new(0.5, 0.7, 1.0)
     }
     let intersection = intersection.unwrap();
     let point = ray.at(intersection.t);
     let surface = intersection.surfaces[0];
-    (1.0 + surface.outwards_normal(point)) / 2.0
+    0.5 * ray_colour(world, surface.random_reflection(point, ray), max_ray_bounces - 1)
 }
