@@ -30,8 +30,8 @@ impl ImageFormatter for DummyFormatter {
 
 #[test]
 fn writes_to_file_faithfully() {
-    let image = Image::new(2, 3, &|_c, _r| Pixel::black());
-    let image2 = Image::new(2, 3, &|_c, _r| Pixel::black());
+    let image = Image::from_pixels(2, 3, &|_c, _r| Pixel::black());
+    let image2 = Image::from_pixels(2, 3, &|_c, _r| Pixel::black());
     let mut dummy_formatter = DummyFormatter {};
     let mut tmpfile = tempfile::tempfile().unwrap();
     image.write_to_file(&mut tmpfile, &mut dummy_formatter).unwrap();

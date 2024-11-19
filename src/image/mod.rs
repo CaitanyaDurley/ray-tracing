@@ -2,8 +2,10 @@ pub mod formatter;
 
 use formatter::ImageFormatter;
 
+use std::convert::identity;
 use std::fs::File;
 use std::io::{self, Write};
+use crate::geometry::Vector;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Pixel {
@@ -68,15 +70,55 @@ impl<'a> Image<'a> {
     /// ```
     /// use ray_tracing::{Pixel, Image};
     /// let colour = |col, row| Pixel::new(0, 100 * row as u8, 50 * col as u8);
-    /// let image = Image::new(2, 3, &colour);
+    /// let image = Image::from_pixels(2, 3, &colour);
     /// let pixels = image.collect();
     /// assert_eq!(pixels[0], Pixel::black());
     /// assert_eq!(pixels[4], Pixel::new(0, 100, 50));
     /// ```
-    pub fn new<F>(height: u16, width: u16, colour: &'a F) -> Self
+    pub fn from_pixels<F>(height: u16, width: u16, colour: &'a F) -> Self
         where F: Fn(u16, u16) -> Pixel
     {
-        let pixels = (0..height).flat_map(move |r| (0..width).map(move |c| colour(c, r)));
+        let pixels = (0..height).flat_map(
+            move |r| (0..width).map(move |c| colour(c, r))
+        );
+        Self {
+            height,
+            width,
+            pixels: Box::new(pixels),
+        }
+    }
+
+    /// Create an `Image` from a vector generator closure
+    /// `colour`'s first argument is the column `Pixel` index (i.e. in the horizontal direction)
+    /// `colour`'s second argument is the row `Pixel` index (i.e. in the vertical direction)
+    /// The closure should return a Vector with elements between 0.0 and 1.0
+    /// # Examples
+    /// ```
+    /// use ray_tracing::{Pixel, Image, Vector};
+    /// let colour = |col, row| Vector::new(0.0, row as f64 / 4.0, col as f64 / 9.0);
+    /// let image = Image::from_vectors(2, 3, &colour, false);
+    /// let pixels = image.collect();
+    /// assert_eq!(pixels[0], Pixel::black());
+    /// assert_eq!(pixels[4], Pixel::new(0, 255 / 4, 255 / 9));
+    /// let image = Image::from_vectors(2, 3, &colour, true);
+    /// let pixels = image.collect();
+    /// assert_eq!(pixels[4], Pixel::new(0, 255 / 2, 255 / 3));
+    /// ```
+    pub fn from_vectors<F>(height: u16, width: u16, vector: &'a F, gamma_correct: bool) -> Self
+        where F: Fn(u16, u16) -> Vector
+    {
+        let gamma_corrector = match gamma_correct {
+            true => |v: Vector| v.map(f64::sqrt),
+            false => identity,
+        };
+        let pixels = (0..height).flat_map(
+            move |r| (0..width).map(move |c| vector(c, r))
+        )
+            .map(gamma_corrector)
+            .map(|v| {
+                let v = v * 255.0;
+                Pixel::new(v.x as u8, v.y as u8, v.z as u8)
+            });
         Self {
             height,
             width,
@@ -130,14 +172,22 @@ mod tests {
 
     #[test]
     fn new_image_has_correct_num_pixels() {
-        let image = Image::new(3, 4, &|_c, _r| Pixel::black());
+        let image = Image::from_pixels(3, 4, &|_c, _r| Pixel::black());
         assert_eq!(image.collect().len(), 12);
     }
 
     #[test]
     fn very_large_image() {
         let width = u16::MAX;
-        let image = Image::new(1, width, &|_c, _r| Pixel::black());
+        let image = Image::from_pixels(1, width, &|_c, _r| Pixel::black());
         assert_eq!(image.collect().len(), width.into());
+    }
+
+    #[test]
+    fn image_from_vector_at_bounds() {
+        let vector = |_c, _r| Vector::new(0.0, 0.25, 1.0);
+        let image = Image::from_vectors(1, 1, &vector, true);
+        let expected = vec![Pixel::new(0, 127, 255)];
+        assert_eq!(image.collect(), expected);
     }
 }

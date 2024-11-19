@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn binary_mode_header() {
         let mut f = PPMFormatter::new(false);
-        let image = Image::new(1, 2, &|_c, _r| Pixel::black());
+        let image = Image::from_pixels(1, 2, &|_c, _r| Pixel::black());
         let header = f.get_bytes(image).next();
         assert_eq!(header, Some(b"P6\n2 1\n255\n".to_vec()));
     }
@@ -70,7 +70,7 @@ mod tests {
     #[test]
     fn ascii_mode_header() {
         let mut f = PPMFormatter::new(true);
-        let image = Image::new(1, 2, &|_c, _r| Pixel::black());
+        let image = Image::from_pixels(1, 2, &|_c, _r| Pixel::black());
         let header = f.get_bytes(image).next();
         assert_eq!(header, Some(b"P3\n2 1\n255\n".to_vec()));
     }
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn ascii_mode_ends_with_newline() {
         let mut f = PPMFormatter::new(true);
-        let image = Image::new(1, 2, &|_c, _r| Pixel::black());
+        let image = Image::from_pixels(1, 2, &|_c, _r| Pixel::black());
         let last = f.get_bytes(image).last().unwrap();
         assert_eq!(last[last.len() - 1], b'\n');
     }

@@ -1,6 +1,5 @@
 use crate::{
     image::{
-        Pixel,
         Image,
         formatter::ppm::PPMFormatter,
     },
@@ -84,18 +83,17 @@ impl Camera {
     }
 
     pub fn render(&self, world: &SurfaceSet, file_name: &Path) -> io::Result<()> {
-        let colour_generator = |x: u16, y: u16| {
+        let vector_generator = |x: u16, y: u16| {
             let direct_ray = self.build_ray(x, y, Interval::empty());
             let diffusion = Interval::new(-0.5, 0.5, IntervalBounds::Closed);
-            let normal_sum: Vector = (0..self.antialiasing)
+            let vector_sum: Vector = (0..self.antialiasing)
                 .map(|_| self.build_ray(x, y, diffusion))
                 .chain(iter::once(direct_ray))
                 .map(|ray| ray_colour(&world, ray, self.max_ray_bounces))
                 .sum();
-            let avg = 255.0 * normal_sum / (self.antialiasing as f64 + 1.0);
-            Pixel::new(avg.x as u8, avg.y as u8, avg.z as u8)
+            vector_sum / (self.antialiasing as f64 + 1.0)
         };
-        let image = Image::new(self.image_height, self.image_width, &colour_generator);
+        let image = Image::from_vectors(self.image_height, self.image_width, &vector_generator, true);
         let mut ppm_formatter = PPMFormatter::new(true);
         let mut f = File::create(file_name)?;
         image.write_to_file(&mut f, &mut ppm_formatter)

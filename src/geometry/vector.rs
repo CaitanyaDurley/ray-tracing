@@ -116,6 +116,18 @@ impl Vector {
     pub fn to_unit(self) -> Self {
         self / self.l2_norm()
     }
+
+    /// Apply the closure against each element in the `Vector`
+    /// # Example
+    /// ```
+    /// use ray_tracing::Vector;
+    /// let a = Vector::new(1.0, 4.0, 9.0);
+    /// let expected = Vector::new(1.0, 2.0, 3.0);
+    /// assert_eq!(a.map(f64::sqrt), expected);
+    /// ```
+    pub fn map<F: Fn(f64) -> f64>(self, f: F) -> Self {
+        Self::new(f(self.x), f(self.y), f(self.z))
+    }
 }
 
 
