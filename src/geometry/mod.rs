@@ -1,5 +1,5 @@
 mod vector;
-pub mod surface;
+pub mod shape;
 
 pub use vector::*;
 
@@ -52,6 +52,10 @@ impl Interval {
 
     pub fn max(&self) -> f64 {
         self.max
+    }
+
+    pub fn bounds(&self) -> IntervalBounds {
+        self.bounds
     }
 
     /// Returns an interval with bounds (f64::MIN, f64::MAX)
