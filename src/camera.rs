@@ -125,8 +125,8 @@ fn ray_colour(world: &SurfaceSet, ray: Ray, max_ray_bounces: u8) -> Vector {
     let point = ray.at(intersection.t);
     let surface = intersection.surfaces[0];
     let scattered_ray = match surface.scatter(point, ray) {
-        Some(sr) => sr.ray,
+        Some(sr) => sr,
         None => return Vector::zero(),
     };
-    0.5 * ray_colour(world, scattered_ray, max_ray_bounces - 1)
+    scattered_ray.attenuation * ray_colour(world, scattered_ray.ray, max_ray_bounces - 1)
 }

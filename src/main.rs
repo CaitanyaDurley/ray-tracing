@@ -26,14 +26,14 @@ fn main() {
             Point::new(0.0, 0.0, -1.0),
             0.5,
         ),
-        Lambertian::new(Vector::zero()),
+        Lambertian::new(Vector::new(0.1, 0.2, 0.5)),
     )));
     world.add(Box::new(UniformSurface::new(
         Sphere::new(
             Point::new(0.0, -100.5, -1.0),
             100.0,
         ),
-        Lambertian::new(Vector::zero()),
+        Lambertian::new(Vector::new(0.8, 0.8, 0.0)),
     )));
     camera.render(&world, Path::new("tmp.ppm")).unwrap();
 }
