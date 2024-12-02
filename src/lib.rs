@@ -1,6 +1,7 @@
 mod image;
 mod geometry;
 mod camera;
+mod surface;
 
 pub use self::{
     image::{
@@ -17,12 +18,17 @@ pub use self::{
         Ray,
         Interval,
         IntervalBounds,
-        surface::{
-            Surface,
-            SurfaceSet,
-            SurfaceSetIntersection,
+        shape::{
+            Shape,
             sphere::Sphere,
         },
     },
     camera::Camera,
+    surface::{
+        Reflection,
+        Material,
+        UniformSurface,
+        SurfaceSet,
+        lambertian::Lambertian,
+    },
 };

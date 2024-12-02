@@ -1,10 +1,10 @@
-use ray_tracing::{Interval, IntervalBounds, Point, Ray, Surface, SurfaceSet, Vector};
+use ray_tracing::{Interval, IntervalBounds, Material, Point, Ray, Reflection, Shape, SurfaceSet, UniformSurface, Vector};
 
-struct DummySurface {
+struct DummyShape {
     border: f64,
 }
 
-impl Surface for DummySurface {
+impl Shape for DummyShape {
     fn intersection(&self, _ray: Ray, time_interval: Interval) -> Option<f64> {
         time_interval
             .contains(self.border)
@@ -16,9 +16,23 @@ impl Surface for DummySurface {
     }
 }
 
+struct DummyMaterial {}
+
+impl Material for DummyMaterial {
+    fn random_reflection(&self, _ray_direction: Vector, rebound_normal: Vector) -> Option<Reflection> {
+        Some(Reflection {
+            attenuation: Vector::zero(),
+            direction: rebound_normal,
+        })
+    }
+}
+
+type DummySurface = UniformSurface<DummyShape, DummyMaterial>;
+
+
 #[test]
 fn normal_against_ray_in_direction_of_outwards_normal() {
-    let surface = DummySurface {
+    let shape = DummyShape {
         border: 3.0,
     };
     let origin = Point::new(0.0, 0.0, 0.0);
@@ -27,14 +41,14 @@ fn normal_against_ray_in_direction_of_outwards_normal() {
         direction: Vector::new(2.0, 3.0, 4.0),
     };
     assert_eq!(
-        surface.normal_against_ray(origin, ray),
+        shape.normal_against_ray(origin, ray),
         Vector::new(-1.0, 0.0, 0.0),
     );
 }
 
 #[test]
 fn normal_against_ray_in_opposite_direction_of_outwards_normal() {
-    let surface = DummySurface {
+    let shape = DummyShape {
         border: 3.0,
     };
     let origin = Point::new(0.0, 0.0, 0.0);
@@ -43,50 +57,22 @@ fn normal_against_ray_in_opposite_direction_of_outwards_normal() {
         direction: Vector::new(-2.0, 3.0, 4.0),
     };
     assert_eq!(
-        surface.normal_against_ray(origin, ray),
+        shape.normal_against_ray(origin, ray),
         Vector::new(1.0, 0.0, 0.0),
     );
 }
 
 #[test]
-fn random_reflection_for_ray_in_direction_of_outwards_normal() {
-    let surface = DummySurface {
-        border: 3.0,
-    };
-    let origin = Point::new(0.0, 0.0, 0.0);
-    let ray = Ray {
-        origin,
-        direction: Vector::new(2.0, 3.0, 4.0),
-    };
-    let r = surface.random_reflection(origin, ray);
-    assert!(r.direction.x <= 0.0)
-}
-
-#[test]
-fn random_reflection_for_ray_in_opposite_direction_of_outwards_normal() {
-    let surface = DummySurface {
-        border: 3.0,
-    };
-    let origin = Point::new(0.0, 0.0, 0.0);
-    let ray = Ray {
-        origin,
-        direction: Vector::new(-2.0, 3.0, 4.0),
-    };
-    let r = surface.random_reflection(origin, ray);
-    assert!(r.direction.x >= 0.0)
-}
-
-#[test]
 fn surface_set_intersection_returns_first() {
-    let first_surface = Box::new(DummySurface {
+    let first_shape = DummyShape {
         border: 2.0,
-    });
-    let second_surface = Box::new(DummySurface {
+    };
+    let second_shape = DummyShape {
         border: 3.0,
-    });
+    };
     let mut surface_set = SurfaceSet::new();
-    surface_set.add(first_surface);
-    surface_set.add(second_surface);
+    surface_set.add(Box::new(DummySurface::new(first_shape, DummyMaterial {})));
+    surface_set.add(Box::new(DummySurface::new(second_shape, DummyMaterial {})));
     let ray = Ray {
         origin: Point::new(0.0, 0.0, 0.0),
         direction: Vector::new(1.0, 0.0, 0.0),

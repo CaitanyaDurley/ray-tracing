@@ -1,6 +1,9 @@
 use ray_tracing::{
+    Vector,
     Point,
     Sphere,
+    UniformSurface,
+    Lambertian,
     SurfaceSet,
     Camera,
 };
@@ -18,13 +21,19 @@ fn main() {
     let viewport_width = viewport_height * image_width as f64 / image_height as f64;
     let camera = Camera::new(image_width, image_height, viewport_width, viewport_height, focal_length, 7, 50);
     let mut world = SurfaceSet::new();
-    world.add(Box::new(Sphere::new(
-        Point::new(0.0, 0.0, -1.0),
-        0.5,
+    world.add(Box::new(UniformSurface::new(
+        Sphere::new(
+            Point::new(0.0, 0.0, -1.0),
+            0.5,
+        ),
+        Lambertian::new(Vector::zero()),
     )));
-    world.add(Box::new(Sphere::new(
-        Point::new(0.0, -100.5, -1.0),
-        100.0,
+    world.add(Box::new(UniformSurface::new(
+        Sphere::new(
+            Point::new(0.0, -100.5, -1.0),
+            100.0,
+        ),
+        Lambertian::new(Vector::zero()),
     )));
     camera.render(&world, Path::new("tmp.ppm")).unwrap();
 }

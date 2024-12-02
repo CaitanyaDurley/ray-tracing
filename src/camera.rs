@@ -9,8 +9,8 @@ use crate::{
         Ray,
         Interval,
         IntervalBounds,
-        surface::SurfaceSet,
     },
+    surface::SurfaceSet,
 };
 
 use std::{fs::File, io, iter, path::Path};
@@ -124,5 +124,9 @@ fn ray_colour(world: &SurfaceSet, ray: Ray, max_ray_bounces: u8) -> Vector {
     let intersection = intersection.unwrap();
     let point = ray.at(intersection.t);
     let surface = intersection.surfaces[0];
-    0.5 * ray_colour(world, surface.random_reflection(point, ray), max_ray_bounces - 1)
+    let scattered_ray = match surface.scatter(point, ray) {
+        Some(sr) => sr.ray,
+        None => return Vector::zero(),
+    };
+    0.5 * ray_colour(world, scattered_ray, max_ray_bounces - 1)
 }
