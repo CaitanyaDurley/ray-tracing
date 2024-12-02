@@ -1,7 +1,4 @@
-use crate::geometry::{
-    Interval,
-    surface::{ Surface, Vector, Point, Ray },
-};
+use super::*;
 
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -20,7 +17,7 @@ impl Sphere {
     }
 }
 
-impl Surface for Sphere {
+impl Shape for Sphere {
     fn intersection(&self, ray: Ray, time_interval: Interval) -> Option<f64> {
         let oc = self.center - ray.origin;
         let a = ray.direction.l2_norm_squared();
