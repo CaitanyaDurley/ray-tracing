@@ -30,5 +30,6 @@ pub use self::{
         UniformSurface,
         SurfaceSet,
         lambertian::Lambertian,
+        metal::Metal,
     },
 };

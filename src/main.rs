@@ -4,6 +4,7 @@ use ray_tracing::{
     Sphere,
     UniformSurface,
     Lambertian,
+    Metal,
     SurfaceSet,
     Camera,
 };
@@ -34,6 +35,20 @@ fn main() {
             100.0,
         ),
         Lambertian::new(Vector::new(0.8, 0.8, 0.0)),
+    )));
+    world.add(Box::new(UniformSurface::new(
+        Sphere::new(
+            Point::new(-1.0, 0.0, -1.0),
+            0.5,
+        ),
+        Metal::new(Vector::new(0.8, 0.8, 0.8)),
+    )));
+    world.add(Box::new(UniformSurface::new(
+        Sphere::new(
+            Point::new(1.0, 0.0, -1.0),
+            0.5,
+        ),
+        Metal::new(Vector::new(0.8, 0.6, 0.2)),
     )));
     camera.render(&world, Path::new("tmp.ppm")).unwrap();
 }
