@@ -10,6 +10,10 @@ pub struct Ray {
 }
 
 impl Ray {
+    pub fn new(origin: Point, direction: Vector) -> Self {
+        Self { origin, direction }
+    }
+
     pub fn from_two_points(origin: Point, second_point: Point) -> Self {
         Self {
             origin,

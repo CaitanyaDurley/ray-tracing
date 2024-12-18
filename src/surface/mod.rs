@@ -1,5 +1,6 @@
 pub mod lambertian;
 pub mod metal;
+pub mod dielectric;
 
 use crate::geometry::{
     Point,
@@ -35,7 +36,7 @@ pub trait Material {
     /// from the `Shape` at the point of intersection (with convention the normal points
     /// against the incident ray), the material should return the direction of the reflected
     /// ray, or None if it is absorbed
-    fn random_reflection(&self, ray_direction: Vector, rebound_normal: Vector) -> Option<Reflection>;
+    fn random_reflection(&self, ray_direction: Vector, rebound_normal: Vector, entering_surface: impl Fn() -> bool) -> Option<Reflection>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -61,9 +62,14 @@ impl<S: Shape, M: Material> UniformSurface<S, M> {
 
 impl<S: Shape, M: Material> Surface for UniformSurface<S, M> {
     fn scatter(&self, point: Point, ray: Ray) -> Option<ScatteredRay> {
+        let entering_surface = || self.shape.intersection(
+            Ray::new(point, ray.direction),
+            Interval::new(0.0001, f64::MAX, IntervalBounds::Open)
+        ).is_some();
         let reflection = self.material.random_reflection(
             ray.direction,
-            self.shape.normal_against_ray(point, ray)
+            self.shape.normal_against_ray(point, ray),
+            entering_surface
         )?;
         Some(ScatteredRay {
             attenuation: reflection.attenuation,

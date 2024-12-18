@@ -19,7 +19,7 @@ impl Shape for DummyShape {
 struct DummyMaterial {}
 
 impl Material for DummyMaterial {
-    fn random_reflection(&self, _ray_direction: Vector, rebound_normal: Vector) -> Option<Reflection> {
+    fn random_reflection(&self, _ray_direction: Vector, rebound_normal: Vector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
         Some(Reflection {
             attenuation: Vector::zero(),
             direction: rebound_normal,

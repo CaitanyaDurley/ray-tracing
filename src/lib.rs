@@ -31,5 +31,6 @@ pub use self::{
         SurfaceSet,
         lambertian::Lambertian,
         metal::Metal,
+        dielectric::Dielectric,
     },
 };
