@@ -19,7 +19,7 @@ impl Material for Dielectric {
         } else {
             1.0 / self.refraction_index
         };
-        let r = ray_direction.to_unit();
+        let r = ray_direction.normalise();
         let refracted_perpendicular = 1.0 / relative_index * (
             r - r.dot(rebound_normal) * rebound_normal
         );

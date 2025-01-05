@@ -15,6 +15,7 @@ pub use self::{
     geometry::{
         Point,
         Vector,
+        UnitVector,
         Ray,
         Interval,
         IntervalBounds,

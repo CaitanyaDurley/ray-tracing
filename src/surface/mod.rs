@@ -5,6 +5,7 @@ pub mod dielectric;
 use crate::geometry::{
     Point,
     Vector,
+    UnitVector,
     Ray,
     shape::Shape,
     Interval,
