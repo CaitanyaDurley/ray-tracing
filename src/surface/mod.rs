@@ -13,7 +13,7 @@ use crate::geometry::{
 };
 
 
-/// A boundary in 3D space which scatters Rays in some (random) fashion
+/// A boundary in 3D space which scatters Rays in some (possibly random) fashion
 pub trait Surface {
     /// Given a `point` on `self`, and an incident `ray`, return a
     /// random reflected `Ray`, or None if it is absorbed
@@ -34,16 +34,21 @@ pub struct ScatteredRay {
 /// A representation of the material of a `Shape`
 pub trait Material {
     /// Given the direction of an incident ray to the material `Shape`, and the normal
-    /// from the `Shape` at the point of intersection (with convention the normal points
-    /// against the incident ray), the material should return the direction of the reflected
-    /// ray, or None if it is absorbed
-    fn random_reflection(&self, ray_direction: Vector, rebound_normal: Vector, entering_surface: impl Fn() -> bool) -> Option<Reflection>;
+    /// from the `Shape` at the point of intersection, the material should return the
+    /// direction of the reflected ray, or None if it is absorbed
+    /// # Parameters
+    /// 1. `ray_direction` - the direction of the incident ray
+    /// 1. `rebound_normal` - the normal from the Shape at the point of intersection, with
+    /// convention the normal points against the incident ray
+    /// 1. `entering_surface` - a closure returning true iff the ray is entering the surface, as opposed to leaving it
+    /// NB: determining whether the ray is entering the surface may be expensive for some Shapes, hence the closure
+    fn random_reflection(&self, ray_direction: UnitVector, rebound_normal: UnitVector, entering_surface: impl Fn() -> bool) -> Option<Reflection>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Reflection {
     pub attenuation: Vector,
-    pub direction: Vector,
+    pub direction: UnitVector,
 }
 
 
