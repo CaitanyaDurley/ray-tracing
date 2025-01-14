@@ -305,10 +305,12 @@ impl PartialOrd<Vector> for f64 {
 }
 
 
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 /// A *unit* vector, implementing `Into` and `Deref` such that
 /// it may be used interchangeably with `Vector`
 pub struct UnitVector(Vector);
+
 
 impl UnitVector {
     /// Create a unit vector given its incline and rotation
@@ -373,6 +375,7 @@ impl UnitVector {
     }
 }
 
+
 impl Deref for UnitVector {
     type Target = Vector;
     
@@ -381,11 +384,157 @@ impl Deref for UnitVector {
     }
 }
 
+
 impl From<UnitVector> for Vector {
     fn from(value: UnitVector) -> Self {
         value.to_vector()
     }
 }
+
+
+impl Add for UnitVector {
+    type Output = Vector;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        self.to_vector() + rhs.to_vector()
+    }
+}
+
+
+impl Add<f64> for UnitVector {
+    type Output = Vector;
+
+    fn add(self, rhs: f64) -> Self::Output {
+        self.to_vector() + rhs
+    }
+}
+
+
+impl Add<UnitVector> for f64 {
+    type Output = Vector;
+
+    fn add(self, rhs: UnitVector) -> Self::Output {
+        rhs + self
+    }
+}
+
+
+impl Add<Vector> for UnitVector {
+    type Output = Vector;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        self.to_vector() + rhs
+    }
+}
+
+
+impl Add<UnitVector> for Vector {
+    type Output = Self;
+
+    fn add(self, rhs: UnitVector) -> Self::Output {
+        self + rhs.to_vector()
+    }
+}
+
+
+impl Sub for UnitVector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.to_vector() - rhs.to_vector()
+    }
+}
+
+
+impl Sub<f64> for UnitVector {
+    type Output = Vector;
+
+    fn sub(self, rhs: f64) -> Self::Output {
+        self.to_vector() - rhs
+    }
+}
+
+
+impl Sub<UnitVector> for f64 {
+    type Output = Vector;
+
+    fn sub(self, rhs: UnitVector) -> Self::Output {
+        self - rhs.to_vector()
+    }
+}
+
+
+impl Sub<Vector> for UnitVector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Vector) -> Self::Output {
+        self.to_vector() - rhs
+    }
+}
+
+
+impl Sub<UnitVector> for Vector {
+    type Output = Self;
+
+    fn sub(self, rhs: UnitVector) -> Self::Output {
+        self - rhs.to_vector()
+    }
+}
+
+
+impl Mul for UnitVector {
+    type Output = Vector;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.to_vector() * rhs.to_vector()
+    }
+}
+
+
+impl Mul<f64> for UnitVector {
+    type Output = Vector;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        self.to_vector() * rhs
+    }
+}
+
+
+impl Mul<Vector> for UnitVector {
+    type Output = Vector;
+
+    fn mul(self, rhs: Vector) -> Self::Output {
+        self.to_vector() * rhs
+    }
+}
+
+
+impl Mul<UnitVector> for Vector {
+    type Output = Self;
+
+    fn mul(self, rhs: UnitVector) -> Self::Output {
+        self * rhs.to_vector()
+    }
+}
+
+
+impl Mul<UnitVector> for f64 {
+    type Output = Vector;
+
+    fn mul(self, rhs: UnitVector) -> Self::Output {
+        self * rhs.to_vector()
+    }
+}
+
+
+impl Div<f64> for UnitVector {
+    type Output = Vector;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        self.to_vector() / rhs
+    }
+}
+
 
 
 #[cfg(test)]
