@@ -6,18 +6,18 @@ pub use vector::*;
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Ray {
     pub origin: Point,
-    pub direction: Vector,
+    pub direction: UnitVector,
 }
 
 impl Ray {
-    pub fn new(origin: Point, direction: Vector) -> Self {
+    pub fn new(origin: Point, direction: UnitVector) -> Self {
         Self { origin, direction }
     }
 
     pub fn from_two_points(origin: Point, second_point: Point) -> Self {
         Self {
             origin,
-            direction: second_point - origin,
+            direction: UnitVector::from(second_point - origin),
         }
     }
 
