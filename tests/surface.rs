@@ -1,4 +1,4 @@
-use ray_tracing::{Interval, IntervalBounds, Material, Point, Ray, Reflection, Shape, SurfaceSet, UniformSurface, Vector};
+use ray_tracing::{Interval, IntervalBounds, Material, Point, Ray, Reflection, Shape, SurfaceSet, UniformSurface, Vector, UnitVector};
 
 struct DummyShape {
     border: f64,
@@ -11,15 +11,16 @@ impl Shape for DummyShape {
             .then_some(self.border)
     }
 
-    fn outwards_normal(&self, _point: Point) -> Vector {
-        Vector::new(1.0, 0.0, 0.0)
+    fn outwards_normal(&self, _point: Point) -> UnitVector {
+        // Vector::new(1.0, 0.0, 0.0)
+        UnitVector::new(0.0, 0.0)
     }
 }
 
 struct DummyMaterial {}
 
 impl Material for DummyMaterial {
-    fn random_reflection(&self, _ray_direction: Vector, rebound_normal: Vector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
+    fn random_reflection(&self, _ray_direction: UnitVector, rebound_normal: UnitVector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
         Some(Reflection {
             attenuation: Vector::zero(),
             direction: rebound_normal,
@@ -38,10 +39,10 @@ fn normal_against_ray_in_direction_of_outwards_normal() {
     let origin = Point::new(0.0, 0.0, 0.0);
     let ray = Ray {
         origin,
-        direction: Vector::new(2.0, 3.0, 4.0),
+        direction: UnitVector::from(Vector::new(2.0, 3.0, 4.0)),
     };
     assert_eq!(
-        shape.normal_against_ray(origin, ray),
+        shape.normal_against_ray(origin, ray).to_vector(),
         Vector::new(-1.0, 0.0, 0.0),
     );
 }
@@ -54,10 +55,10 @@ fn normal_against_ray_in_opposite_direction_of_outwards_normal() {
     let origin = Point::new(0.0, 0.0, 0.0);
     let ray = Ray {
         origin,
-        direction: Vector::new(-2.0, 3.0, 4.0),
+        direction: UnitVector::from(Vector::new(-2.0, 3.0, 4.0)),
     };
     assert_eq!(
-        shape.normal_against_ray(origin, ray),
+        shape.normal_against_ray(origin, ray).to_vector(),
         Vector::new(1.0, 0.0, 0.0),
     );
 }
@@ -75,7 +76,7 @@ fn surface_set_intersection_returns_first() {
     surface_set.add(Box::new(DummySurface::new(second_shape, DummyMaterial {})));
     let ray = Ray {
         origin: Point::new(0.0, 0.0, 0.0),
-        direction: Vector::new(1.0, 0.0, 0.0),
+        direction: UnitVector::from(Vector::new(1.0, 0.0, 0.0)),
     };
     let surface_set_intersection = surface_set
         .intersection(ray, Interval::positive_reals(IntervalBounds::Open))
