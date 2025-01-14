@@ -14,10 +14,10 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn random_reflection(&self, ray_direction: Vector, rebound_normal: Vector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
+    fn random_reflection(&self, ray_direction: UnitVector, rebound_normal: UnitVector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
         Some(Reflection {
             attenuation: self.albedo,
-            direction: ray_direction - 2.0 * rebound_normal * ray_direction.dot(rebound_normal),
+            direction: UnitVector::from(ray_direction - 2.0 * rebound_normal * ray_direction.dot(rebound_normal.to_vector())),
         })
     }
 }

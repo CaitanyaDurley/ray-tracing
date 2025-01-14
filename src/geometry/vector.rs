@@ -1,8 +1,9 @@
+use core::f64::consts::PI;
 use std::{
     cmp::Ordering,
     convert::identity,
     iter::Sum,
-    ops::{Add, Div, Mul, Sub}
+    ops::{Add, Deref, Div, Mul, Sub}
 };
 
 
@@ -37,20 +38,6 @@ impl Vector {
     /// ```
     pub fn random_within(low: f64, high: f64) -> Self {
         low + (high - low) * Vector::new(rand::random(), rand::random(), rand::random())
-    }
-
-    /// Returns a random unit vector
-    /// # Example
-    /// ```
-    /// use ray_tracing::Vector;
-    /// let v = Vector::random_unit();
-    /// assert!((v.l2_norm() - 1.0).abs() < 1e-12);
-    /// ```
-    pub fn random_unit() -> Self {
-        let incline = 2.0 * 3.141 * rand::random::<f64>();
-        let hypotenuse = incline.cos();
-        let rot = 2.0 * 3.141 * rand::random::<f64>();
-        Self::new(hypotenuse * rot.cos(), hypotenuse * rot.sin(), incline.sin())
     }
 
     /// Returns the dot product of self and rhs
@@ -111,9 +98,9 @@ impl Vector {
     /// ```
     /// use ray_tracing::Vector;
     /// let a = Vector::new(1.0, 2.0, 2.0);
-    /// assert_eq!(a.to_unit(), a / 3.0);
+    /// assert_eq!(a.normalise(), a / 3.0);
     /// ```
-    pub fn to_unit(self) -> Self {
+    pub fn normalise(self) -> Self {
         self / self.l2_norm()
     }
 
@@ -316,6 +303,239 @@ impl PartialOrd<Vector> for f64 {
         other.le(self)
     }
 }
+
+
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+/// A *unit* vector, implementing `Into` and `Deref` such that
+/// it may be used interchangeably with `Vector`
+pub struct UnitVector(Vector);
+
+
+impl UnitVector {
+    /// Create a unit vector given its incline and rotation
+    /// # Arguments
+    /// 1. `incline` - the angle (in radians) to the x-y plane
+    /// 1. `rotation` - the angle (in radians) within the x-y plane
+    /// # Example
+    /// ```
+    /// use ray_tracing::{Vector, UnitVector};
+    /// use core::f64::consts::PI;
+    /// let v = UnitVector::new(-PI / 2.0, PI);
+    /// let v2 = Vector::new(0.0, 0.0, -1.0);
+    /// let diff = v.to_vector() - v2;
+    /// assert!(diff.l2_norm().abs() < 1e-12);
+    /// ```
+    pub fn new(incline: f64, rotation: f64) -> Self {
+        let hypotenuse = incline.cos();
+        Self(Vector::new(
+            hypotenuse * rotation.cos(),
+            hypotenuse * rotation.sin(),
+            incline.sin()
+        ))
+    }
+
+    /// Create the unit vector parallel to vector
+    /// # Parameters
+    /// `vector` - need not be of unit length
+    /// # Example
+    /// ```
+    /// use ray_tracing::{Vector, UnitVector};
+    /// let actual = UnitVector::from(Vector::new(2.0, 0.0, 0.0));
+    /// let expected = UnitVector::new(0.0, 0.0);
+    /// assert_eq!(actual, expected);
+    /// ```
+    pub fn from(vector: Vector) -> Self {
+        Self(vector.normalise())
+    }
+
+    /// Convert the UnitVector into a regular Vector
+    /// # Example
+    /// ```
+    /// use ray_tracing::{Vector, UnitVector};
+    /// let v1 = Vector::new(1.0, 0.0, 0.0);
+    /// let v2 = UnitVector::new(0.0, 0.0).to_vector();
+    /// assert_eq!(v1, v2)
+    /// ```
+    pub fn to_vector(self) -> Vector {
+        self.0
+    }
+
+    /// Returns a random unit vector
+    /// # Example
+    /// ```
+    /// use ray_tracing::UnitVector;
+    /// let v = UnitVector::random();
+    /// assert!((v.l2_norm() - 1.0).abs() < 1e-12);
+    /// ```
+    pub fn random() -> Self {
+        let incline = 2.0 * PI * rand::random::<f64>();
+        let rot = 2.0 * PI * rand::random::<f64>();
+        Self::new(incline, rot)
+    }
+}
+
+
+impl Deref for UnitVector {
+    type Target = Vector;
+    
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+
+impl From<UnitVector> for Vector {
+    fn from(value: UnitVector) -> Self {
+        value.to_vector()
+    }
+}
+
+
+impl Add for UnitVector {
+    type Output = Vector;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        self.to_vector() + rhs.to_vector()
+    }
+}
+
+
+impl Add<f64> for UnitVector {
+    type Output = Vector;
+
+    fn add(self, rhs: f64) -> Self::Output {
+        self.to_vector() + rhs
+    }
+}
+
+
+impl Add<UnitVector> for f64 {
+    type Output = Vector;
+
+    fn add(self, rhs: UnitVector) -> Self::Output {
+        rhs + self
+    }
+}
+
+
+impl Add<Vector> for UnitVector {
+    type Output = Vector;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        self.to_vector() + rhs
+    }
+}
+
+
+impl Add<UnitVector> for Vector {
+    type Output = Self;
+
+    fn add(self, rhs: UnitVector) -> Self::Output {
+        self + rhs.to_vector()
+    }
+}
+
+
+impl Sub for UnitVector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.to_vector() - rhs.to_vector()
+    }
+}
+
+
+impl Sub<f64> for UnitVector {
+    type Output = Vector;
+
+    fn sub(self, rhs: f64) -> Self::Output {
+        self.to_vector() - rhs
+    }
+}
+
+
+impl Sub<UnitVector> for f64 {
+    type Output = Vector;
+
+    fn sub(self, rhs: UnitVector) -> Self::Output {
+        self - rhs.to_vector()
+    }
+}
+
+
+impl Sub<Vector> for UnitVector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Vector) -> Self::Output {
+        self.to_vector() - rhs
+    }
+}
+
+
+impl Sub<UnitVector> for Vector {
+    type Output = Self;
+
+    fn sub(self, rhs: UnitVector) -> Self::Output {
+        self - rhs.to_vector()
+    }
+}
+
+
+impl Mul for UnitVector {
+    type Output = Vector;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.to_vector() * rhs.to_vector()
+    }
+}
+
+
+impl Mul<f64> for UnitVector {
+    type Output = Vector;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        self.to_vector() * rhs
+    }
+}
+
+
+impl Mul<Vector> for UnitVector {
+    type Output = Vector;
+
+    fn mul(self, rhs: Vector) -> Self::Output {
+        self.to_vector() * rhs
+    }
+}
+
+
+impl Mul<UnitVector> for Vector {
+    type Output = Self;
+
+    fn mul(self, rhs: UnitVector) -> Self::Output {
+        self * rhs.to_vector()
+    }
+}
+
+
+impl Mul<UnitVector> for f64 {
+    type Output = Vector;
+
+    fn mul(self, rhs: UnitVector) -> Self::Output {
+        self * rhs.to_vector()
+    }
+}
+
+
+impl Div<f64> for UnitVector {
+    type Output = Vector;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        self.to_vector() / rhs
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {

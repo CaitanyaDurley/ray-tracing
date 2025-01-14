@@ -16,10 +16,10 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn random_reflection(&self, _ray_direction: Vector, rebound_normal: Vector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
+    fn random_reflection(&self, _ray_direction: UnitVector, rebound_normal: UnitVector, _entering_surface: impl Fn() -> bool) -> Option<Reflection> {
         Some(Reflection {
             attenuation: self.albedo,
-            direction: rebound_normal + Vector::random_unit(),
+            direction: UnitVector::from(rebound_normal + UnitVector::random()),
         })
     }
 }

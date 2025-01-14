@@ -34,15 +34,15 @@ impl Shape for Sphere {
             .next()
     }
 
-    fn outwards_normal(&self, point: Point) -> Vector {
-        (point - self.center) / self.radius
+    fn outwards_normal(&self, point: Point) -> UnitVector {
+        UnitVector::from(point - self.center)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::IntervalBounds;
+    use crate::geometry::{Vector, IntervalBounds};
 
     #[test]
     #[should_panic(expected = "assertion failed: radius > 0.0")]
@@ -54,7 +54,7 @@ mod tests {
     fn non_intersection_returns_none() {
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
-            direction: Vector::new(1.0, 0.0, 0.0),
+            direction: UnitVector::from(Vector::new(1.0, 0.0, 0.0)),
         };
         let sphere = Sphere::new(
             Point::new(-2.0, 0.0, 0.0),
@@ -70,7 +70,7 @@ mod tests {
     fn tangent_returns_solution() {
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
-            direction: Vector::new(1.0, 0.0, 0.0),
+            direction: UnitVector::from(Vector::new(1.0, 0.0, 0.0)),
         };
         let sphere = Sphere::new(
             Point::new(2.0, 1.0, 0.0),
@@ -86,7 +86,7 @@ mod tests {
     fn two_solutions_returns_earlier() {
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
-            direction: Vector::new(1.0, 0.0, 0.0),
+            direction: UnitVector::from(Vector::new(1.0, 0.0, 0.0)),
         };
         let sphere = Sphere::new(
             Point::new(2.0, 0.0, 0.0),
@@ -102,7 +102,7 @@ mod tests {
     fn two_solutions_one_in_range() {
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
-            direction: Vector::new(1.0, 0.0, 0.0),
+            direction: UnitVector::from(Vector::new(1.0, 0.0, 0.0)),
         };
         let sphere = Sphere::new(
             Point::new(2.0, 0.0, 0.0),

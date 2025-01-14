@@ -118,7 +118,7 @@ fn ray_colour(world: &SurfaceSet, ray: Ray, max_ray_bounces: u8) -> Vector {
     let intersection = world
         .intersection(ray, Interval::new(0.001, f64::MAX, IntervalBounds::Open));
     if intersection.is_none() {
-        let a = (ray.direction.to_unit().y + 1.0) / 2.0;
+        let a = (ray.direction.normalise().y + 1.0) / 2.0;
         return (1.0 - a) * Vector::new(1.0, 1.0, 1.0) + a * Vector::new(0.5, 0.7, 1.0)
     }
     let intersection = intersection.unwrap();
